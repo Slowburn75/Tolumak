@@ -1,0 +1,24 @@
+{
+  "name": "@Tolumak/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@Tolumak/db": "workspace:*",
+    "@Tolumak/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@Tolumak/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
