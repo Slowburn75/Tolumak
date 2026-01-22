@@ -6,15 +6,27 @@ export const o = os.$context<Context>();
 
 export const publicProcedure = o;
 
-const requireAuth = o.middleware(async ({ context, next }) => {
-  if (!context.session?.user) {
+export const protectedProcedure = publicProcedure.use(async ({ context, next }) => {
+  if (!context.user) {
     throw new ORPCError("UNAUTHORIZED");
   }
   return next({
     context: {
-      session: context.session,
+      user: context.user,
     },
   });
 });
 
-export const protectedProcedure = publicProcedure.use(requireAuth);
+export const adminProcedure = protectedProcedure.use(async ({ context, next }) => {
+  if (context.role !== "ADMIN") {
+    throw new ORPCError("FORBIDDEN", {
+      message: "Admin access required",
+    });
+  }
+  return next({
+    context: {
+      user: context.user,
+      role: context.role,
+    },
+  });
+});

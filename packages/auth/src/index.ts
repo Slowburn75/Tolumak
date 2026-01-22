@@ -20,4 +20,11 @@ export const auth = betterAuth({
     },
   },
   plugins: [],
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+      },
+    },
+  },
 });
