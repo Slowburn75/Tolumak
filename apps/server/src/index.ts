@@ -75,4 +75,12 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
+if (import.meta.main) {
+  Bun.serve({
+    port: 3000,
+    fetch: app.fetch,
+  });
+  console.log("Server running on http://localhost:3000");
+}
+
 export default app;
