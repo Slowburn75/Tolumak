@@ -11,6 +11,7 @@ export const auth = betterAuth({
   trustedOrigins: [env.CORS_ORIGIN],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
   },
   advanced: {
     defaultCookieAttributes: {

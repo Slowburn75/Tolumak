@@ -9,14 +9,14 @@ const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
 const prismaClientSingleton = () => {
-    return new PrismaClient({
-        adapter,
-        log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-    });
+  return new PrismaClient({
+    adapter,
+    log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+  });
 };
 
 declare global {
-    var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
 const prisma = globalThis.prisma ?? prismaClientSingleton();

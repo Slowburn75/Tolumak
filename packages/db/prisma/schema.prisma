@@ -13,13 +13,22 @@ model User {
   email         String
   emailVerified DateTime?
   image         String?
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  role              Role                 @default(USER)
+  phone             String?
+  address           Json?
+  lastLoginAt       DateTime?
+  isActive          Boolean              @default(true)
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  sessions          Session[]
+  accounts          Account[]
   orders            Order[]
-  confirmedPayments Payment[] @relation("ConfirmedPayments")
+  confirmedPayments Payment[]            @relation("ConfirmedPayments")
+  statusChanges     OrderStatusHistory[] @relation("StatusChanges")
+  couponUsages      CouponUsage[]
+  activityLogs      ActivityLog[]
+  settingUpdates    Setting[]            @relation("SettingUpdates")
 
   @@unique([email])
   @@map("user")
@@ -79,38 +88,122 @@ model Verification {
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id             String        @id @default(cuid())
+  name           String
+  slug           String        @unique @default(cuid())
+  sku            String        @unique @default(cuid())
+  description    String
+  images         String[]      // Array of image URLs
+  price          Int           // store in cents/kobo
+  compareAtPrice Int?          // for showing discounts, in kobo
+  stock          Int           @default(0)
+  weight         Decimal?      // for shipping calculations
+  attributes     Json?         // key-value pairs like {size: "M", color: "Red"}
+  status         ProductStatus @default(ACTIVE)
+  collectionId   String?
+  collection     Collection?   @relation(fields: [collectionId], references: [id])
+  categoryId     String
+  category       Category      @relation(fields: [categoryId], references: [id])
+  orderItems     OrderItem[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Collection {
+  id          String    @id @default(cuid())
   name        String
-  slug        String   @unique
-  description String
-  images      String[] // Array of image URLs
-  price       Int      // store in cents (e.g., 999 for $9.99)
-  stock       Int      @default(0)
-  isPublished Boolean  @default(false)
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id])
-  orderItems  OrderItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  slug        String    @unique
+  description String?
+  image       String?
+  isActive    Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Attribute {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  values      String[]
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  products Product[]
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique @default(cuid())
+  description String?
+  image       String?
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  products    Product[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
 model Order {
-  id              String      @id @default(cuid())
+  id              String               @id @default(cuid())
   userId          String
-  user            User        @relation(fields: [userId], references: [id])
+  user            User                 @relation(fields: [userId], references: [id])
   items           OrderItem[]
-  total           Int
-  status          OrderStatus @default(PENDING_PAYMENT)
-  shippingAddress String?     // Can be expanded to a separate model later
+  subtotal        Int                  // in kobo
+  discountAmount  Int                  @default(0) // in kobo
+  shippingFee     Int                  @default(0) // in kobo
+  total           Int                  // in kobo
+  status          OrderStatus          @default(PENDING_PAYMENT)
+  shippingAddress Json?                // {name, phone, address, city, state, postalCode}
+  trackingNumber  String?
+  adminNotes      String?
+  couponId        String?
+  coupon          Coupon?              @relation(fields: [couponId], references: [id])
+  couponCode      String?
   payment         Payment?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  statusHistory   OrderStatusHistory[]
+  couponUsages    CouponUsage[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model Coupon {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  type           CouponType
+  value          Int
+  minOrderAmount Int?
+  maxDiscount    Int?
+  usageLimit     Int?
+  usageCount     Int           @default(0)
+  perUserLimit   Int?
+  validFrom      DateTime
+  validUntil     DateTime
+  isActive       Boolean       @default(true)
+  description    String?
+  orders         Order[]
+  usages         CouponUsage[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model CouponUsage {
+  id             String   @id @default(cuid())
+  couponId       String
+  coupon         Coupon   @relation(fields: [couponId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  orderId        String
+  order          Order    @relation(fields: [orderId], references: [id])
+  discountAmount Int
+  createdAt      DateTime @default(now())
+
+  @@unique([couponId, orderId])
 }
 
 model Payment {
@@ -139,6 +232,19 @@ model BankAccount {
   updatedAt     DateTime @updatedAt
 }
 
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id])
+  status    OrderStatus
+  changedBy String?
+  admin     User?       @relation("StatusChanges", fields: [changedBy], references: [id])
+  notes     String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+}
+
 model OrderItem {
   id        String  @id @default(cuid())
   orderId  String
@@ -157,6 +263,13 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+  REFUNDED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
 }
 
 enum PaymentMethod {
@@ -169,4 +282,79 @@ enum PaymentStatus {
   AWAITING_CONFIRMATION
   CONFIRMED
   REJECTED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+// Phase 3 models to append to schema.prisma
+
+model Setting {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  value       Json
+  category    SettingCategory
+  isPublic    Boolean          @default(false)
+  description String?
+  updatedBy   String?
+  admin       User?            @relation("SettingUpdates", fields: [updatedBy], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ActivityLog {
+  id         String         @id @default(cuid())
+  userId     String?
+  user       User?          @relation(fields: [userId], references: [id])
+  action     ActivityAction
+  entity     String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime       @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model SystemMetric {
+  id         String     @id @default(cuid())
+  metricType MetricType
+  value      Decimal
+  metadata   Json?
+  recordedAt DateTime   @default(now())
+
+  @@index([metricType, recordedAt])
+}
+
+enum SettingCategory {
+  GENERAL
+  PAYMENT
+  SHIPPING
+  TAX
+  EMAIL
+  ADVANCED
+}
+
+enum ActivityAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  STATUS_CHANGE
+  PAYMENT_CONFIRM
+  PAYMENT_REJECT
+  SETTING_UPDATE
+}
+
+enum MetricType {
+  DAILY_REVENUE
+  DAILY_ORDERS
+  DAILY_SIGNUPS
+  PRODUCT_VIEWS
+  LOW_STOCK_ALERT
 }

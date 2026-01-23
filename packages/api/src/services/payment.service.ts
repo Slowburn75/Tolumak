@@ -3,154 +3,145 @@ import { productService } from "./product.service";
 import { bankAccountService } from "./bank-account.service";
 
 export class PaymentService {
-    async createPayment(data: {
-        orderId: string;
-        method: "COD" | "BANK_TRANSFER";
-        userId: string;
-    }) {
-        const order = await prisma.order.findUnique({
-            where: { id: data.orderId },
-            include: { items: true },
+  async createPayment(data: { orderId: string; method: "COD" | "BANK_TRANSFER"; userId: string }) {
+    const order = await prisma.order.findUnique({
+      where: { id: data.orderId },
+      include: { items: true },
+    });
+
+    if (!order) throw new Error("Order not found");
+    if (order.userId !== data.userId) throw new Error("Unauthorized");
+
+    const payment = await prisma.$transaction(async (tx) => {
+      const newPayment = await tx.payment.create({
+        data: {
+          orderId: data.orderId,
+          amount: order.total,
+          method: data.method,
+          status: data.method === "COD" ? "CONFIRMED" : "PENDING",
+        },
+      });
+
+      if (data.method === "COD") {
+        // Reduce stock immediately for COD
+        for (const item of order.items) {
+          await productService.reduceStock(item.productId, item.quantity, tx);
+        }
+
+        // Update order status
+        await tx.order.update({
+          where: { id: data.orderId },
+          data: { status: "CONFIRMED" },
         });
+      }
 
-        if (!order) throw new Error("Order not found");
-        if (order.userId !== data.userId) throw new Error("Unauthorized");
+      return newPayment;
+    });
 
-        const payment = await prisma.$transaction(async (tx) => {
-            const newPayment = await tx.payment.create({
-                data: {
-                    orderId: data.orderId,
-                    amount: order.total,
-                    method: data.method,
-                    status: data.method === "COD" ? "CONFIRMED" : "PENDING",
-                },
-            });
+    const activeBank =
+      data.method === "BANK_TRANSFER" ? await bankAccountService.getActiveBankAccount() : null;
 
-            if (data.method === "COD") {
-                // Reduce stock immediately for COD
-                for (const item of order.items) {
-                    await productService.reduceStock(item.productId, item.quantity, tx);
-                }
+    return {
+      payment,
+      bankAccount: activeBank,
+    };
+  }
 
-                // Update order status
-                await tx.order.update({
-                    where: { id: data.orderId },
-                    data: { status: "CONFIRMED" },
-                });
-            }
+  async uploadPaymentProof(data: { paymentId: string; proofImageUrl: string; userId: string }) {
+    const payment = await prisma.payment.findUnique({
+      where: { id: data.paymentId },
+      include: { order: true },
+    });
 
-            return newPayment;
-        });
+    if (!payment) throw new Error("Payment not found");
+    if (payment.order.userId !== data.userId) throw new Error("Unauthorized");
+    if (payment.status === "CONFIRMED") throw new Error("Payment already confirmed");
 
-        const activeBank = data.method === "BANK_TRANSFER"
-            ? await bankAccountService.getActiveBankAccount()
-            : null;
+    return await prisma.payment.update({
+      where: { id: data.paymentId },
+      data: {
+        proofImageUrl: data.proofImageUrl,
+        status: "AWAITING_CONFIRMATION",
+      },
+    });
+  }
 
-        return {
-            payment,
-            bankAccount: activeBank,
-        };
-    }
+  async confirmPayment(paymentId: string, adminId: string) {
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { order: { include: { items: true } } },
+    });
 
-    async uploadPaymentProof(data: {
-        paymentId: string;
-        proofImageUrl: string;
-        userId: string;
-    }) {
-        const payment = await prisma.payment.findUnique({
-            where: { id: data.paymentId },
-            include: { order: true },
-        });
+    if (!payment) throw new Error("Payment not found");
+    if (payment.status === "CONFIRMED") throw new Error("Payment already confirmed");
 
-        if (!payment) throw new Error("Payment not found");
-        if (payment.order.userId !== data.userId) throw new Error("Unauthorized");
-        if (payment.status === "CONFIRMED") throw new Error("Payment already confirmed");
+    return await prisma.$transaction(async (tx) => {
+      // 1. Confirm payment
+      const confirmedPayment = await tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: "CONFIRMED",
+          confirmedBy: adminId,
+          confirmedAt: new Date(),
+        },
+      });
 
-        return await prisma.payment.update({
-            where: { id: data.paymentId },
-            data: {
-                proofImageUrl: data.proofImageUrl,
-                status: "AWAITING_CONFIRMATION",
-            },
-        });
-    }
+      // 2. Reduce stock
+      for (const item of payment.order.items) {
+        await productService.reduceStock(item.productId, item.quantity, tx);
+      }
 
-    async confirmPayment(paymentId: string, adminId: string) {
-        const payment = await prisma.payment.findUnique({
-            where: { id: paymentId },
-            include: { order: { include: { items: true } } },
-        });
+      // 3. Update order status
+      await tx.order.update({
+        where: { id: payment.orderId },
+        data: { status: "CONFIRMED" },
+      });
 
-        if (!payment) throw new Error("Payment not found");
-        if (payment.status === "CONFIRMED") throw new Error("Payment already confirmed");
+      return confirmedPayment;
+    });
+  }
 
-        return await prisma.$transaction(async (tx) => {
-            // 1. Confirm payment
-            const confirmedPayment = await tx.payment.update({
-                where: { id: paymentId },
-                data: {
-                    status: "CONFIRMED",
-                    confirmedBy: adminId,
-                    confirmedAt: new Date(),
-                },
-            });
+  async rejectPayment(paymentId: string, adminId: string, reason: string) {
+    const payment = await prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
 
-            // 2. Reduce stock
-            for (const item of payment.order.items) {
-                await productService.reduceStock(item.productId, item.quantity, tx);
-            }
+    if (!payment) throw new Error("Payment not found");
+    if (payment.status === "CONFIRMED") throw new Error("Cannot reject confirmed payment");
 
-            // 3. Update order status
-            await tx.order.update({
-                where: { id: payment.orderId },
-                data: { status: "CONFIRMED" },
-            });
+    return await prisma.$transaction(async (tx) => {
+      const rejectedPayment = await tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: "REJECTED",
+          rejectionReason: reason,
+        },
+      });
 
-            return confirmedPayment;
-        });
-    }
+      await tx.order.update({
+        where: { id: payment.orderId },
+        data: { status: "CANCELLED" },
+      });
 
-    async rejectPayment(paymentId: string, adminId: string, reason: string) {
-        const payment = await prisma.payment.findUnique({
-            where: { id: paymentId },
-        });
+      return rejectedPayment;
+    });
+  }
 
-        if (!payment) throw new Error("Payment not found");
-        if (payment.status === "CONFIRMED") throw new Error("Cannot reject confirmed payment");
+  async listPendingPayments() {
+    return await prisma.payment.findMany({
+      where: { status: "AWAITING_CONFIRMATION" },
+      include: { order: true, admin: true },
+      orderBy: { createdAt: "asc" },
+    });
+  }
 
-        return await prisma.$transaction(async (tx) => {
-            const rejectedPayment = await tx.payment.update({
-                where: { id: paymentId },
-                data: {
-                    status: "REJECTED",
-                    rejectionReason: reason,
-                },
-            });
-
-            await tx.order.update({
-                where: { id: payment.orderId },
-                data: { status: "CANCELLED" },
-            });
-
-            return rejectedPayment;
-        });
-    }
-
-    async listPendingPayments() {
-        return await prisma.payment.findMany({
-            where: { status: "AWAITING_CONFIRMATION" },
-            include: { order: true, admin: true },
-            orderBy: { createdAt: "asc" },
-        });
-    }
-
-    async listUserPayments(userId: string) {
-        return await prisma.payment.findMany({
-            where: { order: { userId } },
-            include: { order: true },
-            orderBy: { createdAt: "desc" },
-        });
-    }
+  async listUserPayments(userId: string) {
+    return await prisma.payment.findMany({
+      where: { order: { userId } },
+      include: { order: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }
 }
 
 export const paymentService = new PaymentService();

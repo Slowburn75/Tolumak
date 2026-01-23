@@ -24,6 +24,8 @@
   "devDependencies": {
     "@Tolumak/config": "workspace:*",
     "hono": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^4.0.18",
+    "vitest-mock-extended": "^3.1.0"
   }
 }

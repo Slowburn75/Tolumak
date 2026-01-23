@@ -14,9 +14,6 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed"
   },
-  "prisma": {
-    "seed": "bun run prisma/seed.ts"
-  },
   "dependencies": {
     "@Tolumak/env": "workspace:*",
     "@prisma/adapter-pg": "^7.2.0",
@@ -30,5 +27,8 @@
     "@types/pg": "^8.16.0",
     "prisma": "^7.2.0",
     "typescript": "catalog:"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   }
 }
