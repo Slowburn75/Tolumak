@@ -4,12 +4,12 @@ import { adminProductService } from "../../../../src/services/admin/product.serv
 import { RPCHandler } from "@orpc/server/fetch";
 
 // Mock context
-const mockAdminContext = {
+const mockadminContext = {
   user: { id: "admin-1", role: "admin", email: "admin@example.com" },
-  role: "ADMIN",
+  role: "admin",
 };
 
-describe("Admin Product Procedure", () => {
+describe("admin Product Procedure", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(adminProductService, "createProduct");
@@ -47,7 +47,7 @@ describe("Admin Product Procedure", () => {
         }),
         {
           prefix: "/rpc",
-          context: mockAdminContext,
+          context: mockadminContext,
         },
       );
 
@@ -87,7 +87,7 @@ describe("Admin Product Procedure", () => {
         }),
         {
           prefix: "/rpc",
-          context: mockAdminContext,
+          context: mockadminContext,
         },
       );
 

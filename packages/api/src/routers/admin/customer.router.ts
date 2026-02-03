@@ -7,7 +7,7 @@ export const customerRouter = {
     .input(
       z.object({
         search: z.string().optional(),
-        role: z.enum(["USER", "ADMIN"]).optional(),
+        role: z.enum(["USER", "admin"]).optional(),
         isActive: z.boolean().optional(),
         emailVerified: z.boolean().optional(),
         hasOrders: z.boolean().optional(),

@@ -7,42 +7,47 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified DateTime?
-  image         String?
-  role              Role                 @default(USER)
-  phone             String?
-  address           Json?
-  lastLoginAt       DateTime?
-  isActive          Boolean              @default(true)
-  metadata          Json?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
-  sessions          Session[]
-  accounts          Account[]
-  orders            Order[]
-  confirmedPayments Payment[]            @relation("ConfirmedPayments")
-  statusChanges     OrderStatusHistory[] @relation("StatusChanges")
-  couponUsages      CouponUsage[]
-  activityLogs      ActivityLog[]
-  settingUpdates    Setting[]            @relation("SettingUpdates")
+// ========================================
+// BETTER-AUTH REQUIRED MODELS
+// DO NOT MODIFY - Required by Better-Auth
+// ========================================
 
-  @@unique([email])
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Better-Auth required relations
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Custom fields for your app
+  role          String    @default("USER")
+  phone         String?
+  address       Json?
+  lastLoginAt   DateTime?
+  isActive      Boolean   @default(true)
+  metadata      Json?
+
+  // Your custom relations
+  orders             Order[]
+  confirmedPayments  Payment[]            @relation("ConfirmedPayments")
+  statusChanges      OrderStatusHistory[] @relation("StatusChanges")
+  couponUsages       CouponUsage[]
+  activityLogs       ActivityLog[]
+  settingUpdates     Setting[]            @relation("SettingUpdates")
+
   @@map("user")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -50,33 +55,32 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  accountId              String
+  providerId             String
+  userId                 String
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken            String?
+  refreshToken           String?
+  idToken                String?
+  accessTokenExpiresAt   DateTime?
+  refreshTokenExpiresAt  DateTime?
+  scope                  String?
+  password               String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
@@ -87,18 +91,22 @@ model Verification {
   @@map("verification")
 }
 
+// ========================================
+// PRODUCT CATALOG MODELS
+// ========================================
+
 model Product {
   id             String        @id @default(cuid())
   name           String
   slug           String        @unique @default(cuid())
   sku            String        @unique @default(cuid())
   description    String
-  images         String[]      // Array of image URLs
-  price          Int           // store in cents/kobo
-  compareAtPrice Int?          // for showing discounts, in kobo
+  images         String[]
+  price          Int
+  compareAtPrice Int?
   stock          Int           @default(0)
-  weight         Decimal?      // for shipping calculations
-  attributes     Json?         // key-value pairs like {size: "M", color: "Red"}
+  weight         Decimal?
+  attributes     Json?
   status         ProductStatus @default(ACTIVE)
   collectionId   String?
   collection     Collection?   @relation(fields: [collectionId], references: [id])
@@ -107,6 +115,11 @@ model Product {
   orderItems     OrderItem[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([collectionId])
+  @@index([status])
+  @@map("product")
 }
 
 model Collection {
@@ -120,6 +133,8 @@ model Collection {
   products    Product[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  @@map("collection")
 }
 
 model Attribute {
@@ -131,6 +146,8 @@ model Attribute {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("attribute")
 }
 
 model Category {
@@ -147,19 +164,32 @@ model Category {
   products    Product[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@index([parentId])
+  @@map("category")
 }
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+// ========================================
+// ORDER & PAYMENT MODELS
+// ========================================
 
 model Order {
   id              String               @id @default(cuid())
   userId          String
   user            User                 @relation(fields: [userId], references: [id])
   items           OrderItem[]
-  subtotal        Int                  // in kobo
-  discountAmount  Int                  @default(0) // in kobo
-  shippingFee     Int                  @default(0) // in kobo
-  total           Int                  // in kobo
+  subtotal        Int
+  discountAmount  Int                  @default(0)
+  shippingFee     Int                  @default(0)
+  total           Int
   status          OrderStatus          @default(PENDING_PAYMENT)
-  shippingAddress Json?                // {name, phone, address, city, state, postalCode}
+  shippingAddress Json?
   trackingNumber  String?
   adminNotes      String?
   couponId        String?
@@ -170,7 +200,98 @@ model Order {
   couponUsages    CouponUsage[]
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("order")
 }
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_item")
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id])
+  amount          Int
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  proofImageUrl   String?
+  confirmedBy     String?
+  admin           User?         @relation("ConfirmedPayments", fields: [confirmedBy], references: [id])
+  confirmedAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status])
+  @@map("payment")
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  bankName      String
+  accountNumber String
+  accountName   String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("bank_account")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  changedBy String?
+  admin     User?       @relation("StatusChanges", fields: [changedBy], references: [id])
+  notes     String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("order_status_history")
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  AWAITING_CONFIRMATION
+  CONFIRMED
+  REJECTED
+}
+
+// ========================================
+// COUPON & DISCOUNT MODELS
+// ========================================
 
 model Coupon {
   id             String        @id @default(cuid())
@@ -190,6 +311,10 @@ model Coupon {
   usages         CouponUsage[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@map("coupon")
 }
 
 model CouponUsage {
@@ -204,103 +329,33 @@ model CouponUsage {
   createdAt      DateTime @default(now())
 
   @@unique([couponId, orderId])
-}
-
-model Payment {
-  id              String        @id @default(cuid())
-  orderId         String        @unique
-  order           Order         @relation(fields: [orderId], references: [id])
-  amount          Int           // store in cents/kobo
-  method          PaymentMethod
-  status          PaymentStatus @default(PENDING)
-  proofImageUrl   String?
-  confirmedBy     String?
-  admin           User?         @relation("ConfirmedPayments", fields: [confirmedBy], references: [id])
-  confirmedAt     DateTime?
-  rejectionReason String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-}
-
-model BankAccount {
-  id            String   @id @default(cuid())
-  bankName      String
-  accountNumber String
-  accountName   String
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-model OrderStatusHistory {
-  id        String      @id @default(cuid())
-  orderId   String
-  order     Order       @relation(fields: [orderId], references: [id])
-  status    OrderStatus
-  changedBy String?
-  admin     User?       @relation("StatusChanges", fields: [changedBy], references: [id])
-  notes     String?
-  createdAt DateTime    @default(now())
-
-  @@index([orderId])
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId  String
-  productId String
-  quantity Int
-  price    Int
-
-  order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
-}
-
-enum OrderStatus {
-  PENDING_PAYMENT
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
-}
-
-enum ProductStatus {
-  DRAFT
-  ACTIVE
-  ARCHIVED
-}
-
-enum PaymentMethod {
-  COD
-  BANK_TRANSFER
-}
-
-enum PaymentStatus {
-  PENDING
-  AWAITING_CONFIRMATION
-  CONFIRMED
-  REJECTED
+  @@index([userId])
+  @@map("coupon_usage")
 }
 
 enum CouponType {
   PERCENTAGE
   FIXED_AMOUNT
 }
-// Phase 3 models to append to schema.prisma
+
+// ========================================
+// SYSTEM & SETTINGS MODELS
+// ========================================
 
 model Setting {
-  id          String           @id @default(cuid())
-  key         String           @unique
+  id          String          @id @default(cuid())
+  key         String          @unique
   value       Json
   category    SettingCategory
-  isPublic    Boolean          @default(false)
+  isPublic    Boolean         @default(false)
   description String?
   updatedBy   String?
-  admin       User?            @relation("SettingUpdates", fields: [updatedBy], references: [id])
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  admin       User?           @relation("SettingUpdates", fields: [updatedBy], references: [id])
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([category])
+  @@map("setting")
 }
 
 model ActivityLog {
@@ -318,6 +373,8 @@ model ActivityLog {
   @@index([userId])
   @@index([entity, entityId])
   @@index([createdAt])
+  @@index([action])
+  @@map("activity_log")
 }
 
 model SystemMetric {
@@ -328,6 +385,7 @@ model SystemMetric {
   recordedAt DateTime   @default(now())
 
   @@index([metricType, recordedAt])
+  @@map("system_metric")
 }
 
 enum SettingCategory {

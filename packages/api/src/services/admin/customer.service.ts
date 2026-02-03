@@ -4,7 +4,7 @@ import type { Prisma } from "@Tolumak/db/prisma/generated";
 export class CustomerService {
   async listCustomers(params: {
     search?: string;
-    role?: "USER" | "ADMIN";
+    role?: "USER" | "admin";
     isActive?: boolean;
     emailVerified?: boolean;
     hasOrders?: boolean;
@@ -34,7 +34,7 @@ export class CustomerService {
     }
 
     if (params.emailVerified !== undefined) {
-      where.emailVerified = params.emailVerified ? { not: null } : null;
+      where.emailVerified = params.emailVerified;
     }
 
     if (params.hasOrders) {
@@ -73,7 +73,7 @@ export class CustomerService {
       const lastOrderDate =
         customer.orders.length > 0
           ? customer.orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
-              .createdAt
+            .createdAt
           : null;
 
       return {

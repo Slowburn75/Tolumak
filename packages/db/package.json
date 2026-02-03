@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@Tolumak/env": "workspace:*",
-    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "catalog:",
     "dotenv": "catalog:",
-    "pg": "^8.17.1",
+    "pg": "^8.17.2",
     "zod": "catalog:"
   },
   "devDependencies": {

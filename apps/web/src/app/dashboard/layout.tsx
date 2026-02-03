@@ -14,7 +14,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (!isPending) {
       if (!session) {
         router.replace("/login");
-      } else if (session.user.role !== "admin") {
+      } else if ((session?.user as any).role !== "admin") {
         router.replace("/"); // Not admin, go home
       } else {
         setIsAuthorized(true);

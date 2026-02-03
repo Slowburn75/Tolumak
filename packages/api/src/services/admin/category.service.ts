@@ -2,10 +2,9 @@ import prisma from "@Tolumak/db";
 
 export class AdminCategoryService {
   async listCategories() {
-    const categories = await prisma.category.findMany({
+    return await prisma.category.findMany({
       include: {
         parent: true,
-        children: true,
         _count: {
           select: { products: true },
         },
@@ -14,21 +13,6 @@ export class AdminCategoryService {
         sortOrder: "asc",
       },
     });
-
-    // Build hierarchical structure
-    const categoryMap = new Map(
-      categories.map((c) => [c.id, { ...c, productCount: c._count.products }]),
-    );
-    const rootCategories: any[] = [];
-
-    categories.forEach((category) => {
-      const cat = categoryMap.get(category.id)!;
-      if (!category.parentId) {
-        rootCategories.push(cat);
-      }
-    });
-
-    return rootCategories;
   }
 
   async getCategoryById(id: string) {

@@ -3,84 +3,73 @@ import prisma from "../src/index";
 async function main() {
   console.log("Seeding database...");
 
-  // Seed Categories
-  const electronics = await prisma.category.upsert({
-    where: { name: "Electronics" },
+  // 1. Seed Top-Level Categories
+  const adult = await prisma.category.upsert({
+    where: { name: "Adult" },
     update: {},
     create: {
-      name: "Electronics",
+      name: "Adult",
+      slug: "adult",
     },
   });
 
-  const clothing = await prisma.category.upsert({
-    where: { name: "Clothing" },
+  const children = await prisma.category.upsert({
+    where: { name: "Children" },
     update: {},
     create: {
-      name: "Clothing",
+      name: "Children",
+      slug: "children",
     },
   });
 
-  const home = await prisma.category.upsert({
-    where: { name: "Home & Kitchen" },
-    update: {},
-    create: {
-      name: "Home & Kitchen",
-    },
-  });
+  // 2. Seed Subcategories
+  const subCategories = [
+    { name: "Underwear", parentId: adult.id },
+    { name: "Shirts", parentId: adult.id },
+    { name: "Shoes", parentId: adult.id },
+    { name: "Underwear (Kids)", parentId: children.id },
+    { name: "Shirts (Kids)", parentId: children.id },
+    { name: "Shoes (Kids)", parentId: children.id },
+  ];
+
+  for (const cat of subCategories) {
+    await prisma.category.upsert({
+      where: { name: cat.name },
+      update: { parentId: cat.parentId },
+      create: {
+        name: cat.name,
+        slug: cat.name.toLowerCase().replace(/\s+/g, "-").replace(/[()]/g, ""),
+        parentId: cat.parentId,
+      },
+    });
+  }
+
+  const adultShirts = await prisma.category.findUnique({ where: { name: "Shirts" } });
+  const adultShoes = await prisma.category.findUnique({ where: { name: "Shoes" } });
 
   console.log("Categories seeded.");
 
-  // Seed Products
+  // 3. Seed Products
   const products = [
     {
-      name: "Smartphone X",
-      slug: "smartphone-x",
-      description: "Latest flagship smartphone with advanced camera.",
-      price: 99900, // $999.00
-      stock: 50,
-      categoryId: electronics.id,
-      images: ["https://example.com/smartphone.jpg"],
-      isPublished: true,
-    },
-    {
-      name: "Wireless Headphones",
-      slug: "wireless-headphones",
-      description: "Noise-cancelling over-ear headphones.",
-      price: 24999, // $249.99
+      name: "Classic White Shirt",
+      slug: "classic-white-shirt",
+      description: "A premium white shirt for formal occasions.",
+      price: 4900, // $49.00 in cents
       stock: 100,
-      categoryId: electronics.id,
-      images: ["https://example.com/headphones.jpg"],
-      isPublished: true,
+      categoryId: adultShirts!.id,
+      images: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800"],
+      sku: "SHIRT-001",
     },
     {
-      name: "Cotton T-Shirt",
-      slug: "cotton-t-shirt",
-      description: "Comfortable 100% cotton t-shirt.",
-      price: 1999, // $19.99
-      stock: 200,
-      categoryId: clothing.id,
-      images: ["https://example.com/tshirt.jpg"],
-      isPublished: true,
-    },
-    {
-      name: "Denim Jeans",
-      slug: "denim-jeans",
-      description: "Classic blue denim jeans.",
-      price: 4999, // $49.99
-      stock: 150,
-      categoryId: clothing.id,
-      images: ["https://example.com/jeans.jpg"],
-      isPublished: true,
-    },
-    {
-      name: "Coffee Maker",
-      slug: "coffee-maker",
-      description: "Programmable coffee maker for your morning brew.",
-      price: 7999, // $79.99
-      stock: 30,
-      categoryId: home.id,
-      images: ["https://example.com/coffeemaker.jpg"],
-      isPublished: true,
+      name: "Leather Oxford Shoes",
+      slug: "leather-oxford-shoes",
+      description: "Handcrafted leather shoes for men.",
+      price: 12000,
+      stock: 50,
+      categoryId: adultShoes!.id,
+      images: ["https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&q=80&w=800"],
+      sku: "SHOE-001",
     },
   ];
 
@@ -102,5 +91,4 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    // No need to disconnect manually as prisma is managed as a singleton
   });

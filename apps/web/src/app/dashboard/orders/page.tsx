@@ -6,7 +6,7 @@ import { orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Search, MoreHorizontal, Eye } from "lucide-react";
+import { Search, MoreHorizontal, Eye, Loader2 } from "lucide-react";
 import { formatPrice } from "@/utils/format";
 import {
   DropdownMenu,
@@ -14,6 +14,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
 export default function OrdersPage() {
@@ -77,99 +92,111 @@ export default function OrdersPage() {
             placeholder="Search orders (ID, Name, Email)..."
             className="pl-8"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
         <div className="w-[180px]">
-          <select
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={statusFilter || ""}
-            onChange={(e) => setStatusFilter(e.target.value || undefined)}
+          <Select
+            value={statusFilter || "ALL"}
+            onValueChange={(val) => setStatusFilter(val === "ALL" ? undefined : val)}
           >
-            <option value="">All Statuses</option>
-            <option value="PENDING_PAYMENT">Pending Payment</option>
-            <option value="CONFIRMED">Confirmed</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="SHIPPED">Shipped</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="CANCELLED">Cancelled</option>
-            <option value="REFUNDED">Refunded</option>
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="PENDING_PAYMENT">Pending Payment</SelectItem>
+              <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+              <SelectItem value="PROCESSING">Processing</SelectItem>
+              <SelectItem value="SHIPPED">Shipped</SelectItem>
+              <SelectItem value="DELIVERED">Delivered</SelectItem>
+              <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem value="REFUNDED">Refunded</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg bg-card">
         {isLoading ? (
-          <div className="p-8 text-center text-muted-foreground">Loading orders...</div>
+          <div className="flex items-center justify-center p-8 text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Loading orders...
+          </div>
         ) : (
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#f9fafb] dark:bg-[#1f2937] text-muted-foreground border-b font-medium">
-              <tr>
-                <th className="px-4 py-3">Order ID</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {data?.orders.map((order) => (
-                <tr key={order.id} className="hover:bg-muted/50 transition-colors">
-                  <td className="px-4 py-3 font-medium font-mono text-xs">
+                <TableRow key={order.id}>
+                  <TableCell className="font-medium font-mono text-xs">
                     {order.id.slice(0, 8)}...
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     {formatDate(order.createdAt.toString())}
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <div className="flex flex-col">
                       <span className="font-medium">{order.user.name}</span>
                       <span className="text-xs text-muted-foreground">{order.user.email}</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="outline" className={`border-0 ${getStatusColor(order.status)}`}>
                       {order.status.replace("_", " ")}
                     </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium">{formatPrice(order.total)}</td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="text-right font-medium">{formatPrice(order.total)}</TableCell>
+                  <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Menu</span>
+                          </Button>
+                        }
+                      />
                       <DropdownMenuContent align="end">
-                        <Link href={`/dashboard/orders/${order.id}`}>
+                        <Link href={`/dashboard/orders/${order.id}` as any}>
                           <DropdownMenuItem>
                             <Eye className="mr-2 h-4 w-4" /> View Details
                           </DropdownMenuItem>
                         </Link>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
               {data?.orders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     No orders found.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
 
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Page {data?.page} of {data?.totalPages}
+          Showing {data?.orders.length || 0} of {data?.total || 0} orders (Page {data?.page} of {data?.totalPages})
         </div>
-        <div className="space-x-2">
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"

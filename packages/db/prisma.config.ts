@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
 import path from "node:path";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
+// Load environment variables
 dotenv.config({
   path: "../../apps/server/.env",
 });
@@ -13,6 +14,6 @@ export default defineConfig({
     seed: "bun prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: process.env.DATABASE_URL,
   },
 });

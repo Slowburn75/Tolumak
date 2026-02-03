@@ -31,7 +31,7 @@ export const orderRouter = {
     const order = await orderService.getOrderById(input);
 
     // Authorization check (user can only see their own orders, or admin can see all)
-    if (order.userId !== context.user.id && (context.user as any).role !== "ADMIN") {
+    if (order.userId !== context.user.id && (context.user as any).role !== "admin") {
       throw new Error("Unauthorized access to this order");
     }
 

@@ -11,25 +11,40 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; // Assuming I need/have Textarea, otherwise Input
-import { ChevronLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// If Textarea doesn't exist, I'll assume Input for now or create it quickly?
-// Step 720 didn't list Textarea. I'll use default HTML textarea with tailwind classes.
+import { FileUpload } from "@/components/ui/file-upload";
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  price: z.coerce.number().min(0),
-  stock: z.coerce.number().int().min(0),
+  price: z.coerce.number().min(0, "Price must be at least 0"),
+  stock: z.coerce.number().int().min(0, "Stock must be at least 0"),
   sku: z.string().min(1, "SKU is required"),
   categoryId: z.string().min(1, "Category is required"),
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
-  images: z.string().optional(), // Comma separated for now as simplified input
+  images: z.array(z.string()).default([]),
 });
 
-type ProductFormValues = z.infer<typeof productSchema>;
+type ProductFormValues = {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  sku: string;
+  categoryId: string;
+  status: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  images: string[];
+};
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -40,15 +55,22 @@ export default function NewProductPage() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       status: "DRAFT",
       stock: 0,
       price: 0,
+      images: [],
     },
   });
+
+  const statusValue = watch("status");
+  const categoryIdValue = watch("categoryId");
+  const images = watch("images");
 
   const { mutateAsync: createProduct } = useMutation({
     mutationFn: async (data: any) => client.admin.products.create(data),
@@ -57,10 +79,7 @@ export default function NewProductPage() {
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
     try {
-      await createProduct({
-        ...data,
-        images: data.images ? data.images.split(",").map((s) => s.trim()) : [],
-      });
+      await createProduct(data);
       toast.success("Product created successfully");
       router.push("/dashboard/products");
     } catch (error: any) {
@@ -70,8 +89,14 @@ export default function NewProductPage() {
     }
   };
 
+  const sortedCategories = categories ? [...categories].sort((a: any, b: any) => {
+    const aName = a.parent ? `${a.parent.name} > ${a.name}` : a.name;
+    const bName = b.parent ? `${b.parent.name} > ${b.name}` : b.name;
+    return aName.localeCompare(bName);
+  }) : [];
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <div className="flex items-center gap-4">
         <Link href="/dashboard/products">
           <Button variant="ghost" size="icon">
@@ -81,25 +106,21 @@ export default function NewProductPage() {
         <h1 className="text-2xl font-bold">Create Product</h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 bg-card p-6 rounded-lg border">
-        <div className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 bg-card p-6 rounded-lg border shadow-sm">
+        <div className="space-y-6">
           <div className="grid gap-2">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" {...register("name")} />
+            <Input id="name" {...register("name")} placeholder="Product name" />
             {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="slug">Slug (Auto-generated)</Label>
-            <Input id="slug" disabled placeholder="Will be generated from name" />
-          </div>
-
-          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <textarea
+            <Textarea
               id="description"
-              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               {...register("description")}
+              placeholder="Product description"
+              rows={4}
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description.message}</p>
@@ -108,8 +129,8 @@ export default function NewProductPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="price">Price</Label>
-              <Input id="price" type="number" step="0.01" {...register("price")} />
+              <Label htmlFor="price">Price (cents)</Label>
+              <Input id="price" type="number" {...register("price")} />
               {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
             </div>
             <div className="grid gap-2">
@@ -122,58 +143,68 @@ export default function NewProductPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="sku">SKU</Label>
-              <Input id="sku" {...register("sku")} />
+              <Input id="sku" {...register("sku")} placeholder="Unique identifier" />
               {errors.sku && <p className="text-sm text-destructive">{errors.sku.message}</p>}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                {...register("status")}
+              <Select
+                value={statusValue}
+                onValueChange={(val) => setValue("status", val as any)}
               >
-                <option value="DRAFT">Draft</option>
-                <option value="ACTIVE">Active</option>
-                <option value="ARCHIVED">Archived</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="ACTIVE">Active</SelectItem>
+                  <SelectItem value="ARCHIVED">Archived</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="category">Category</Label>
-            <select
-              id="category"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              {...register("categoryId")}
+            <Select
+              value={categoryIdValue}
+              onValueChange={(val) => setValue("categoryId", val)}
             >
-              <option value="">Select a category</option>
-              {categories?.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortedCategories?.map((cat: any) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.parent ? `${cat.parent.name} > ` : ""}{cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {errors.categoryId && (
               <p className="text-sm text-destructive">{errors.categoryId.message}</p>
             )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="images">Images (Comma separated URLs)</Label>
-            <Input
-              id="images"
-              {...register("images")}
-              placeholder="https://example.com/image1.jpg, https://..."
+          <div className="grid gap-4">
+            <Label>Images</Label>
+            <FileUpload
+              value={images || []}
+              onChange={(urls) => setValue("images", urls)}
+              onRemove={(url) => setValue("images", images.filter(i => i !== url))}
             />
-            <p className="text-xs text-muted-foreground">
-              Upload functionality coming soon. Paste URLs for now.
-            </p>
+            {errors.images && <p className="text-sm text-destructive">{errors.images.message}</p>}
           </div>
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Product"}
+          <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : "Create Product"}
           </Button>
         </div>
       </form>
