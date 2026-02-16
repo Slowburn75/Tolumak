@@ -6,7 +6,7 @@ import { client, orpc } from "@/utils/orpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash, MoreHorizontal, Loader2 } from "lucide-react";
+import { Plus, Search, Edit, Trash, MoreHorizontal, Loader2, Package } from "lucide-react";
 import { formatPrice } from "@/utils/format";
 import {
   DropdownMenu,
@@ -24,10 +24,12 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { ProductVariantsModal } from "@/components/admin/product-variants-modal";
 
 export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [variantsModal, setVariantsModal] = useState<any>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(
@@ -55,6 +57,25 @@ export default function ProductsPage() {
     if (confirm("Are you sure you want to delete this product?")) {
       await deleteProduct(id);
     }
+  };
+
+  const getStockDisplay = (product: any) => {
+    if (product.hasVariants && product.variants?.length > 0) {
+      const totalStock = product.variants.reduce((sum: number, v: any) => sum + v.stock, 0);
+      return (
+        <button
+          onClick={() => setVariantsModal(product)}
+          className="text-blue-600 hover:underline"
+        >
+          {product.variants.length} variant{product.variants.length !== 1 ? "s" : ""} ({totalStock})
+        </button>
+      );
+    }
+    return (
+      <span className={product.stock < 5 ? "text-destructive font-bold" : ""}>
+        {product.stock}
+      </span>
+    );
   };
 
   return (
@@ -103,7 +124,7 @@ export default function ProductsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.products.map((product) => (
+              {data?.products.map((product: any) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
@@ -118,7 +139,14 @@ export default function ProductsPage() {
                           No Image
                         </div>
                       )}
-                      <span>{product.name}</span>
+                      <div>
+                        <span>{product.name}</span>
+                        {product.hasVariants && (
+                          <Badge variant="outline" className="ml-2 text-xs">
+                            Variants
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -135,11 +163,7 @@ export default function ProductsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{formatPrice(product.price)}</TableCell>
-                  <TableCell>
-                    <span className={product.stock < 5 ? "text-destructive font-bold" : ""}>
-                      {product.stock}
-                    </span>
-                  </TableCell>
+                  <TableCell>{getStockDisplay(product)}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {product.category?.name || "N/A"}
                   </TableCell>
@@ -159,6 +183,11 @@ export default function ProductsPage() {
                             <Edit className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                         </Link>
+                        {product.hasVariants && (
+                          <DropdownMenuItem onClick={() => setVariantsModal(product)}>
+                            <Package className="mr-2 h-4 w-4" /> Manage Variants
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
                           onClick={() => handleDelete(product.id)}
@@ -206,6 +235,18 @@ export default function ProductsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Product Variants Modal */}
+      {variantsModal && (
+        <ProductVariantsModal
+          productId={variantsModal.id}
+          productName={variantsModal.name}
+          variants={variantsModal.variants || []}
+          open={!!variantsModal}
+          onClose={() => setVariantsModal(null)}
+        />
+      )}
     </div>
   );
 }
+

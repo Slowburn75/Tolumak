@@ -53,6 +53,7 @@ export class AdminOrderService {
               id: true,
               name: true,
               email: true,
+              phone: true,
             },
           },
           payment: true,
@@ -93,12 +94,14 @@ export class AdminOrderService {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         payment: true,
         items: {
           include: {
             product: true,
+            variant: true,
           },
         },
         statusHistory: {

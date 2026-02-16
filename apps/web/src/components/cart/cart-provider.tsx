@@ -4,13 +4,17 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export interface CartItem {
-  id: string;
+  id: string; // unique identifier (usually variantId or productId)
   name: string;
   slug: string;
   price: number;
   image?: string;
   quantity: number;
   maxStock: number;
+  productId: string;
+  variantId?: string;
+  size?: string;
+  color?: string;
 }
 
 interface CartContextType {
@@ -35,7 +39,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const stored = localStorage.getItem("cart");
       if (stored) {
-        setItems(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        // Migration for legacy items
+        const migrated = parsed.map((item: any) => ({
+          ...item,
+          productId: item.productId || item.id,
+        }));
+        setItems(migrated);
       }
     } catch (e) {
       console.error("Failed to load cart", e);
@@ -53,7 +63,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (product: Omit<CartItem, "quantity">) => {
     setItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      // Check if item already exists based on ID (which should be unique for product/variant)
+      // OR specifically check productId + variantId combination for robustness
+      const existing = prev.find((item) => {
+        if (product.variantId) {
+          return item.productId === product.productId && item.variantId === product.variantId;
+        }
+        return item.id === product.id;
+      });
+
       if (existing) {
         if (existing.quantity >= product.maxStock) {
           toast.error("Cannot add more of this item (out of stock limit)");
@@ -61,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         toast.success("Updated cart quantity");
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+          item.id === existing.id ? { ...item, quantity: item.quantity + 1 } : item,
         );
       }
       toast.success("Added to cart");

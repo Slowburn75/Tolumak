@@ -33,6 +33,7 @@ const productSchema = z.object({
   categoryId: z.string().min(1, "Category is required"),
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
   images: z.array(z.string()).default([]),
+  collectionId: z.string().optional(),
 });
 
 type ProductFormValues = {
@@ -44,6 +45,7 @@ type ProductFormValues = {
   categoryId: string;
   status: "DRAFT" | "ACTIVE" | "ARCHIVED";
   images: string[];
+  collectionId?: string;
 };
 
 export default function NewProductPage() {
@@ -51,6 +53,7 @@ export default function NewProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: categories } = useQuery(orpc.category.list.queryOptions());
+  const { data: collections } = useQuery(orpc.collection.list.queryOptions());
 
   const {
     register,
@@ -70,6 +73,7 @@ export default function NewProductPage() {
 
   const statusValue = watch("status");
   const categoryIdValue = watch("categoryId");
+  const collectionIdValue = watch("collectionId");
   const images = watch("images");
 
   const { mutateAsync: createProduct } = useMutation({
@@ -79,7 +83,11 @@ export default function NewProductPage() {
   const onSubmit = async (data: ProductFormValues) => {
     setIsSubmitting(true);
     try {
-      await createProduct(data);
+      const { collectionId, ...rest } = data;
+      await createProduct({
+        ...rest,
+        collectionId: collectionId === "_none_" ? undefined : collectionId,
+      });
       toast.success("Product created successfully");
       router.push("/dashboard/products");
     } catch (error: any) {
@@ -184,6 +192,26 @@ export default function NewProductPage() {
             {errors.categoryId && (
               <p className="text-sm text-destructive">{errors.categoryId.message}</p>
             )}
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="collection">Collection</Label>
+            <Select
+              value={collectionIdValue}
+              onValueChange={(val) => setValue("collectionId", val)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a collection (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_none_">None</SelectItem>
+                {collections?.map((col: any) => (
+                  <SelectItem key={col.id} value={col.id}>
+                    {col.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-4">

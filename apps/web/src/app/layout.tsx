@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
@@ -23,16 +22,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-svh bg-background`}
+      >
         <Providers>
-          <div className="grid grid-rows-[auto_1fr] h-svh">
+          <div className="flex min-h-svh flex-col">
             <Header />
-            {children}
+            <main className="flex-1">{children}</main>
           </div>
         </Providers>
       </body>

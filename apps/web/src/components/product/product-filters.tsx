@@ -4,8 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { orpc } from "@/utils/orpc";
-// import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+
+const SORT_OPTIONS = [
+    { label: "Newest", value: "newest" },
+    { label: "Price: Low → High", value: "price_asc" },
+    { label: "Price: High → Low", value: "price_desc" },
+] as const;
 
 export function ProductFilters() {
     const router = useRouter();
@@ -19,6 +24,8 @@ export function ProductFilters() {
             } else {
                 params.delete(name);
             }
+            // Reset page when filters change
+            params.delete("page");
             return params.toString();
         },
         [searchParams],
@@ -27,15 +34,19 @@ export function ProductFilters() {
     const { data: categories } = useQuery(orpc.category.list.queryOptions());
 
     const currentCategory = searchParams.get("categoryId");
+    const currentSort = searchParams.get("sort");
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Categories */}
             <div>
-                <h3 className="mb-4 text-lg font-semibold">Categories</h3>
-                <div className="space-y-2">
+                <h3 className="mb-4 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400">
+                    Categories
+                </h3>
+                <div className="space-y-1">
                     <Button
                         variant={!currentCategory ? "secondary" : "ghost"}
-                        className="w-full justify-start"
+                        className="w-full justify-start text-sm"
                         onClick={() => router.push("/products")}
                     >
                         All Products
@@ -44,7 +55,7 @@ export function ProductFilters() {
                         <Button
                             key={category.id}
                             variant={currentCategory === category.id ? "secondary" : "ghost"}
-                            className="w-full justify-start"
+                            className="w-full justify-start text-sm"
                             onClick={() =>
                                 router.push(`/products?${createQueryString("categoryId", category.id)}`)
                             }
@@ -54,6 +65,28 @@ export function ProductFilters() {
                     ))}
                 </div>
             </div>
+
+            {/* Sort */}
+            <div>
+                <h3 className="mb-4 text-[10px] uppercase tracking-[0.2em] font-bold text-stone-400">
+                    Sort By
+                </h3>
+                <div className="space-y-1">
+                    {SORT_OPTIONS.map((option) => (
+                        <Button
+                            key={option.value}
+                            variant={currentSort === option.value ? "secondary" : "ghost"}
+                            className="w-full justify-start text-sm"
+                            onClick={() =>
+                                router.push(`/products?${createQueryString("sort", option.value)}`)
+                            }
+                        >
+                            {option.label}
+                        </Button>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
+

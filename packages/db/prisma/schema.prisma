@@ -40,6 +40,9 @@ model User {
   couponUsages       CouponUsage[]
   activityLogs       ActivityLog[]
   settingUpdates     Setting[]            @relation("SettingUpdates")
+  wishlist           Wishlist[]
+  reviews            Review[]
+  addresses          Address[]
 
   @@map("user")
 }
@@ -96,30 +99,54 @@ model Verification {
 // ========================================
 
 model Product {
-  id             String        @id @default(cuid())
+  id             String           @id @default(cuid())
   name           String
-  slug           String        @unique @default(cuid())
-  sku            String        @unique @default(cuid())
+  slug           String           @unique @default(cuid())
+  sku            String           @unique @default(cuid())
   description    String
   images         String[]
   price          Int
   compareAtPrice Int?
-  stock          Int           @default(0)
+  stock          Int              @default(0)
   weight         Decimal?
   attributes     Json?
-  status         ProductStatus @default(ACTIVE)
+  status         ProductStatus    @default(ACTIVE)
+  hasVariants    Boolean          @default(false)
   collectionId   String?
-  collection     Collection?   @relation(fields: [collectionId], references: [id])
+  collection     Collection?      @relation(fields: [collectionId], references: [id])
   categoryId     String
-  category       Category      @relation(fields: [categoryId], references: [id])
+  category       Category         @relation(fields: [categoryId], references: [id])
+  variants       ProductVariant[]
   orderItems     OrderItem[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  wishlistedBy   Wishlist[]
+  reviews        Review[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([categoryId])
   @@index([collectionId])
   @@index([status])
   @@map("product")
+}
+
+model ProductVariant {
+  id             String   @id @default(cuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku            String   @unique
+  size           String
+  color          String?
+  price          Int
+  compareAtPrice Int?
+  stock          Int      @default(0)
+  isActive       Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  orderItems     OrderItem[]
+
+  @@index([productId])
+  @@map("product_variant")
 }
 
 model Collection {
@@ -176,6 +203,58 @@ enum ProductStatus {
 }
 
 // ========================================
+// WISHLIST & REVIEWS MODELS
+// ========================================
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([productId])
+  @@index([userId])
+  @@map("review")
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  label      String?  // "Home", "Work"
+  name       String
+  phone      String
+  address    String
+  city       String
+  state      String
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@map("address")
+}
+
+// ========================================
 // ORDER & PAYMENT MODELS
 // ========================================
 
@@ -213,8 +292,10 @@ model OrderItem {
   productId String
   quantity  Int
   price     Int
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  variantId String?
+  order     Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@index([orderId])
   @@index([productId])

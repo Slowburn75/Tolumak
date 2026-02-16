@@ -9,10 +9,13 @@ export const orderRouter = {
         items: z.array(
           z.object({
             productId: z.string(),
+            variantId: z.string().optional(),
             quantity: z.number().int().min(1),
           }),
         ),
         shippingAddress: z.string().optional(),
+        paymentMethod: z.enum(["COD", "BANK_TRANSFER"]),
+        couponCode: z.string().optional(),
       }),
     )
     .handler(async ({ input, context }) => {
@@ -20,6 +23,8 @@ export const orderRouter = {
         userId: context.user.id,
         items: input.items,
         shippingAddress: input.shippingAddress,
+        paymentMethod: input.paymentMethod,
+        couponCode: input.couponCode,
       });
     }),
 

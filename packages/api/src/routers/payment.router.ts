@@ -1,11 +1,33 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../index";
 import { paymentService } from "../services/payment.service";
-import { bankAccountService } from "../services/bank-account.service";
+import { settingService } from "../services/admin/setting.service";
 
 export const paymentRouter = {
   getActiveBankAccount: publicProcedure.handler(async () => {
-    return await bankAccountService.getActiveBankAccount();
+    try {
+      const isEnabled = await settingService.getSettingValue<boolean>("payment_bank_transfer_enabled", true);
+
+      if (!isEnabled) return null;
+
+      const [bankName, accountNumber, accountName] = await Promise.all([
+        settingService.getSettingValue<string>("bank_name", ""),
+        settingService.getSettingValue<string>("bank_account_number", ""),
+        settingService.getSettingValue<string>("bank_account_name", ""),
+      ]);
+
+      if (bankName && accountNumber && accountName) {
+        return {
+          bankName,
+          accountNumber,
+          accountName,
+          instructions: "Please make the transfer and upload proof of payment.",
+        };
+      }
+    } catch (e) {
+      console.error("Failed to fetch bank account details:", e);
+    }
+    return null;
   }),
 
   createPayment: protectedProcedure

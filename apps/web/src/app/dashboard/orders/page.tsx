@@ -84,13 +84,13 @@ export default function OrdersPage() {
         <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search orders (ID, Name, Email)..."
-            className="pl-8"
+            className="pl-8 w-full"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -98,12 +98,12 @@ export default function OrdersPage() {
             }}
           />
         </div>
-        <div className="w-[180px]">
+        <div className="w-full md:w-[180px]">
           <Select
             value={statusFilter || "ALL"}
             onValueChange={(val) => setStatusFilter(val === "ALL" ? undefined : val)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>

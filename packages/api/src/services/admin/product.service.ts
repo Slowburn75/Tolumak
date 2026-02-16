@@ -58,6 +58,9 @@ export class AdminProductService {
       where: { id },
       include: {
         category: true,
+        variants: {
+          orderBy: { sortOrder: "asc" },
+        },
       },
     });
 
@@ -67,6 +70,7 @@ export class AdminProductService {
 
     return product;
   }
+
 
   async createProduct(data: {
     name: string;
@@ -80,6 +84,7 @@ export class AdminProductService {
     weight?: number;
     attributes?: Record<string, any>;
     status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
+    collectionId?: string;
   }) {
     // Check SKU uniqueness
     const existing = await prisma.product.findUnique({
@@ -102,7 +107,7 @@ export class AdminProductService {
     // Generate slug from name
     const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
-    const { categoryId, ...rest } = data;
+    const { categoryId, collectionId, ...rest } = data;
 
     return await prisma.product.create({
       data: {
@@ -112,6 +117,9 @@ export class AdminProductService {
         category: {
           connect: { id: categoryId },
         },
+        collection: collectionId ? {
+          connect: { id: collectionId }
+        } : undefined,
       },
     });
   }
@@ -130,6 +138,7 @@ export class AdminProductService {
       weight: number;
       attributes: Record<string, any>;
       status: "DRAFT" | "ACTIVE" | "ARCHIVED";
+      collectionId: string | null;
     }>,
   ) {
     // Check if product exists
@@ -175,6 +184,20 @@ export class AdminProductService {
         connect: { id: data.categoryId },
       };
       delete updateData.categoryId;
+    }
+
+    // Handle collection relation
+    if (data.collectionId !== undefined) {
+      if (data.collectionId === null) {
+        updateData.collection = {
+          disconnect: true,
+        };
+      } else {
+        updateData.collection = {
+          connect: { id: data.collectionId },
+        };
+      }
+      delete updateData.collectionId;
     }
 
     return await prisma.product.update({

@@ -5,7 +5,27 @@ import { RPCHandler } from "@orpc/server/fetch";
 
 // Mock context
 const mockadminContext = {
-  user: { id: "admin-1", role: "admin", email: "admin@example.com" },
+  session: {
+    user: {
+      id: "admin-1",
+      role: "admin",
+      email: "admin@example.com",
+      emailVerified: true,
+      name: "Admin User",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    session: { id: "sess-1", createdAt: new Date(), updatedAt: new Date(), userId: "admin-1", expiresAt: new Date(), token: "token" },
+  },
+  user: {
+    id: "admin-1",
+    role: "admin",
+    email: "admin@example.com",
+    emailVerified: true,
+    name: "Admin User",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
   role: "admin",
 };
 
@@ -27,9 +47,20 @@ describe("admin Product Procedure", () => {
         categoryId: "cat-1",
       };
 
-      const mockResult = { id: "prod-1", ...input, slug: "new-product" };
+      const mockResult = {
+        id: "prod-1",
+        ...input,
+        slug: "new-product",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "ACTIVE" as const,
+        collectionId: null,
+        weight: null,
+        attributes: null,
+        hasVariants: false,
+      };
 
-      vi.mocked(adminProductService.createProduct).mockResolvedValue(mockResult);
+      vi.mocked(adminProductService.createProduct).mockResolvedValue(mockResult as any);
 
       // Create a temporary router for testing
       const testRouter = {
@@ -55,15 +86,9 @@ describe("admin Product Procedure", () => {
       expect(response.matched).toBe(true);
 
       // Check body
-      const body = await response.response.json();
+      const body = await response.response?.json();
 
-      if (response.response.status !== 200) {
-        console.error("Request Failed with status:", response.response.status);
-        // console.error("Response Body keys:", Object.keys(body || {}));
-        console.error("Response Body:", JSON.stringify(body, null, 2));
-      }
-
-      expect(response.response.status).toBe(200);
+      expect(response.response?.status).toBe(200);
       expect(adminProductService.createProduct).toHaveBeenCalledWith(input);
       expect(body).toEqual({ json: mockResult });
     });
@@ -87,12 +112,12 @@ describe("admin Product Procedure", () => {
         }),
         {
           prefix: "/rpc",
-          context: mockadminContext,
+          context: mockadminContext as any,
         },
       );
 
       // Expect a validation error status
-      expect(response.response.status).toBe(400);
+      expect(response.response?.status).toBe(400);
       expect(adminProductService.createProduct).not.toHaveBeenCalled();
     });
   });

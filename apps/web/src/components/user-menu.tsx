@@ -41,6 +41,22 @@ export default function UserMenu() {
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => router.push("/profile")}>
+            Profile
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/orders")}>
+            My Orders
+          </DropdownMenuItem>
+          {(session.user as any).role === "admin" && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                Admin Dashboard
+              </DropdownMenuItem>
+            </>
+          )}
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             variant="destructive"
             onClick={() => {

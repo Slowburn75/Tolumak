@@ -8,6 +8,10 @@ import { adminPaymentRouter } from "./admin-payment.router";
 import { adminRouter } from "./admin";
 import { categoryRouter } from "./category.router";
 import { collectionRouter } from "./collection.router";
+import { couponRouter } from "./coupon.router";
+import { wishlistRouter } from "./wishlist.router";
+import { reviewRouter } from "./review.router";
+import { addressRouter } from "./address.router";
 
 export const appRouter = {
   healthCheck: publicProcedure.handler(() => {
@@ -26,6 +30,12 @@ export const appRouter = {
   admin: adminRouter,
   category: categoryRouter,
   collection: collectionRouter,
+  coupon: couponRouter,
+  wishlist: wishlistRouter,
+  review: reviewRouter,
+  address: addressRouter,
 };
+
+
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

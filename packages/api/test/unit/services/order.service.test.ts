@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { OrderService } from "../../../../src/services/order.service";
+import { OrderService } from "../../../src/services/order.service";
 import prisma from "@Tolumak/db";
 import { mockDeep, mockReset } from "vitest-mock-extended";
-import { Prisma } from "@Tolumak/db/prisma/generated";
+import { PrismaClient } from "@Tolumak/db/prisma/generated";
 import { OrderStatus } from "@Tolumak/db/prisma/generated";
 
 // Mock prisma
@@ -13,7 +13,7 @@ vi.mock("@Tolumak/db", async () => {
   };
 });
 
-const prismaMock = prisma as unknown as ReturnType<typeof mockDeep<Prisma.PrismaClient>>;
+const prismaMock = prisma as unknown as ReturnType<typeof mockDeep<PrismaClient>>;
 
 describe("OrderService", () => {
   let orderService: OrderService;
@@ -38,7 +38,7 @@ describe("OrderService", () => {
       prismaMock.product.findMany.mockResolvedValue([product] as any);
 
       // Mock transaction
-      prismaMock.$transaction.mockImplementation(async (callback) => {
+      prismaMock.$transaction.mockImplementation(async (callback: any) => {
         return callback(prismaMock);
       });
 
@@ -49,7 +49,12 @@ describe("OrderService", () => {
       } as any);
 
       // Act
-      const result = await orderService.createOrder({ userId, items });
+      const result = await orderService.createOrder({
+        userId,
+        items,
+        paymentMethod: "COD",
+        shippingAddress: "{}"
+      });
 
       // Assert
       expect(result.total).toBe(200);
@@ -90,7 +95,12 @@ describe("OrderService", () => {
       prismaMock.product.findMany.mockResolvedValue([product] as any);
 
       // Act & Assert
-      await expect(orderService.createOrder({ userId, items })).rejects.toThrow(
+      await expect(orderService.createOrder({
+        userId,
+        items,
+        paymentMethod: "COD",
+        shippingAddress: "{}"
+      })).rejects.toThrow(
         "Insufficient stock for product: Test Product",
       );
     });
@@ -102,7 +112,12 @@ describe("OrderService", () => {
       prismaMock.product.findMany.mockResolvedValue([]);
 
       // Act & Assert
-      await expect(orderService.createOrder({ userId, items })).rejects.toThrow(
+      await expect(orderService.createOrder({
+        userId,
+        items,
+        paymentMethod: "COD",
+        shippingAddress: "{}"
+      })).rejects.toThrow(
         "One or more products not found",
       );
     });

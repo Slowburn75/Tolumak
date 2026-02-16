@@ -72,7 +72,7 @@ export class CustomerService {
       const totalSpent = customer.orders.reduce((sum, order) => sum + order.total, 0);
       const lastOrderDate =
         customer.orders.length > 0
-          ? customer.orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
+          ? customer.orders.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]!
             .createdAt
           : null;
 

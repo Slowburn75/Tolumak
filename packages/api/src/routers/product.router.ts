@@ -14,6 +14,7 @@ export const productRouter = {
           sort: z.enum(["price_asc", "price_desc", "newest"]).optional(),
           page: z.number().int().positive().default(1),
           limit: z.number().int().positive().default(20),
+          ids: z.array(z.string()).optional(),
         })
         .optional(),
     )
@@ -28,6 +29,12 @@ export const productRouter = {
   getBySlug: publicProcedure.input(z.object({ slug: z.string() })).handler(async ({ input }) => {
     return await productService.getProductBySlug(input.slug);
   }),
+
+  listRelated: publicProcedure
+    .input(z.object({ productId: z.string(), limit: z.number().optional() }))
+    .handler(async ({ input }) => {
+      return await productService.listRelated(input.productId, input.limit);
+    }),
 
   createProduct: adminProcedure
     .input(

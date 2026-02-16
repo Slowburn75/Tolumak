@@ -32,6 +32,7 @@ const productSchema = z.object({
     categoryId: z.string().min(1, "Category is required"),
     status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]),
     images: z.array(z.string()).default([]),
+    collectionId: z.string().optional(),
 });
 
 type ProductFormValues = {
@@ -43,6 +44,7 @@ type ProductFormValues = {
     categoryId: string;
     status: "DRAFT" | "ACTIVE" | "ARCHIVED";
     images: string[];
+    collectionId?: string;
 };
 
 export default function EditProductPage() {
@@ -56,6 +58,7 @@ export default function EditProductPage() {
     );
 
     const { data: categories } = useQuery(orpc.category.list.queryOptions());
+    const { data: collections } = useQuery(orpc.collection.list.queryOptions());
 
     const {
         register,
@@ -82,12 +85,14 @@ export default function EditProductPage() {
                 categoryId: product.categoryId,
                 status: product.status as any,
                 images: product.images || [],
+                collectionId: (product as any).collectionId || "_none_",
             });
         }
     }, [product, reset]);
 
     const statusValue = watch("status");
     const categoryIdValue = watch("categoryId");
+    const collectionIdValue = watch("collectionId");
     const images = watch("images");
 
     const { mutateAsync: updateProduct } = useMutation({
@@ -97,7 +102,11 @@ export default function EditProductPage() {
     const onSubmit = async (data: ProductFormValues) => {
         setIsSubmitting(true);
         try {
-            await updateProduct(data);
+            const { collectionId, ...rest } = data;
+            await updateProduct({
+                ...rest,
+                collectionId: collectionId === "_none_" ? null : collectionId,
+            });
             toast.success("Product updated successfully");
             router.push("/dashboard/products");
         } catch (error: any) {
@@ -210,6 +219,26 @@ export default function EditProductPage() {
                         {errors.categoryId && (
                             <p className="text-sm text-destructive">{errors.categoryId.message}</p>
                         )}
+                    </div>
+
+                    <div className="grid gap-2">
+                        <Label htmlFor="collection">Collection</Label>
+                        <Select
+                            value={collectionIdValue}
+                            onValueChange={(val) => setValue("collectionId", val)}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a collection (optional)" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="_none_">None</SelectItem>
+                                {collections?.map((col: any) => (
+                                    <SelectItem key={col.id} value={col.id}>
+                                        {col.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="grid gap-4">

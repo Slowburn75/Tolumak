@@ -14,9 +14,13 @@ const createProductSchema = z.object({
   weight: z.number().optional(),
   attributes: z.record(z.string(), z.any()).optional(),
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+  hasVariants: z.boolean().optional().default(false),
+  collectionId: z.string().optional(),
 });
 
-const updateProductSchema = createProductSchema.partial();
+const updateProductSchema = createProductSchema.extend({
+  collectionId: z.string().nullable().optional(),
+}).partial();
 
 export const productRouter = {
   list: adminProcedure

@@ -25,7 +25,7 @@ export class PaymentService {
       if (data.method === "COD") {
         // Reduce stock immediately for COD
         for (const item of order.items) {
-          await productService.reduceStock(item.productId, item.quantity, tx);
+          await productService.reduceStock(item.productId, item.quantity, item.variantId || undefined, tx);
         }
 
         // Update order status
@@ -88,7 +88,7 @@ export class PaymentService {
 
       // 2. Reduce stock
       for (const item of payment.order.items) {
-        await productService.reduceStock(item.productId, item.quantity, tx);
+        await productService.reduceStock(item.productId, item.quantity, item.variantId || undefined, tx);
       }
 
       // 3. Update order status
@@ -101,7 +101,7 @@ export class PaymentService {
     });
   }
 
-  async rejectPayment(paymentId: string, adminId: string, reason: string) {
+  async rejectPayment(paymentId: string, _adminId: string, reason: string) {
     const payment = await prisma.payment.findUnique({
       where: { id: paymentId },
     });

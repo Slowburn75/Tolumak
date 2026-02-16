@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { AdminProductService } from "../../../../../src/services/admin/product.service";
+import { AdminProductService } from "../../../../src/services/admin/product.service";
 import prisma from "@Tolumak/db";
 import { mockDeep, mockReset } from "vitest-mock-extended";
-import { Prisma } from "@Tolumak/db/prisma/generated";
+import { PrismaClient } from "@Tolumak/db/prisma/generated";
 
 // Mock prisma
 vi.mock("@Tolumak/db", async () => {
@@ -12,7 +12,7 @@ vi.mock("@Tolumak/db", async () => {
   };
 });
 
-const prismaMock = prisma as unknown as ReturnType<typeof mockDeep<Prisma.PrismaClient>>;
+const prismaMock = prisma as unknown as ReturnType<typeof mockDeep<PrismaClient>>;
 
 describe("AdminProductService", () => {
   let service: AdminProductService;

@@ -148,12 +148,12 @@ export class DashboardService {
 
     const salesByDate = new Map<string, number>();
 
-    payments.forEach((payment) => {
+    payments.forEach((payment: { amount: number; confirmedAt: Date | null }) => {
       if (!payment.confirmedAt) return;
 
-      const date =
+      const date: string =
         groupBy === "day"
-          ? payment.confirmedAt.toISOString().split("T")[0]
+          ? payment.confirmedAt.toISOString().split("T")[0]!
           : `${payment.confirmedAt.getFullYear()}-${String(payment.confirmedAt.getMonth() + 1).padStart(2, "0")}`;
 
       salesByDate.set(date, (salesByDate.get(date) || 0) + payment.amount);

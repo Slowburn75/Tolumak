@@ -8,6 +8,7 @@ import { couponRouter } from "./coupon.router";
 import { customerRouter } from "./customer.router";
 import { settingRouter } from "./setting.router";
 import { activityRouter, metricRouter } from "./activity-metric.router";
+import { variantRouter } from "./variant.router";
 
 export const adminRouter = {
   dashboard: dashboardRouter,
@@ -21,4 +22,5 @@ export const adminRouter = {
   settings: settingRouter,
   activities: activityRouter,
   metrics: metricRouter,
+  productVariants: variantRouter,
 };

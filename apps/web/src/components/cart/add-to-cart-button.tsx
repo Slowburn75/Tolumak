@@ -12,6 +12,7 @@ export function AddToCartButton({ product }: { product: any }) {
   const handleAddToCart = () => {
     addItem({
       id: product.id,
+      productId: product.id,
       name: product.name,
       slug: product.slug,
       price: product.price,

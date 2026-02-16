@@ -74,11 +74,42 @@ async function main() {
   ];
 
   for (const product of products) {
-    await prisma.product.upsert({
+    const createdProduct = await prisma.product.upsert({
       where: { slug: product.slug },
       update: product,
       create: product,
     });
+
+    if (product.slug === "classic-white-shirt") {
+      // Add variants
+      const variants = [
+        { size: "S", color: "White" },
+        { size: "M", color: "White" },
+        { size: "L", color: "White" },
+        { size: "S", color: "Blue" },
+        { size: "M", color: "Blue" },
+      ];
+
+      for (const v of variants) {
+        await prisma.productVariant.upsert({
+          where: { sku: `${product.sku}-${v.size}-${v.color.toUpperCase()}` },
+          update: { stock: 20 },
+          create: {
+            productId: createdProduct.id,
+            sku: `${product.sku}-${v.size}-${v.color.toUpperCase()}`,
+            size: v.size,
+            color: v.color,
+            price: product.price,
+            stock: 20,
+          },
+        });
+      }
+
+      await prisma.product.update({
+        where: { id: createdProduct.id },
+        data: { hasVariants: true },
+      });
+    }
   }
 
   console.log("Products seeded.");

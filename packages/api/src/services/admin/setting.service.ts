@@ -4,22 +4,7 @@ const CRITICAL_SETTINGS = ["site_name", "currency", "payment_methods"];
 
 export class SettingService {
   async getAllSettings() {
-    const settings = await prisma.setting.findMany();
-
-    const grouped: Record<string, any[]> = {
-      GENERAL: [],
-      PAYMENT: [],
-      SHIPPING: [],
-      TAX: [],
-      EMAIL: [],
-      ADVANCED: [],
-    };
-
-    settings.forEach((setting) => {
-      grouped[setting.category].push(setting);
-    });
-
-    return grouped;
+    return await prisma.setting.findMany();
   }
 
   async getSetting(key: string) {

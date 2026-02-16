@@ -37,6 +37,9 @@
   "dependencies": {
     "@Tolumak/env": "workspace:*",
     "@prisma/client-runtime-utils": "^7.3.0",
+    "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-progress": "^1.1.8",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },

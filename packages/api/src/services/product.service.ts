@@ -10,6 +10,7 @@ export class ProductService {
     sort?: "price_asc" | "price_desc" | "newest";
     page?: number;
     limit?: number;
+    ids?: string[];
   }) {
     const where: Prisma.ProductWhereInput = {};
 
@@ -34,6 +35,10 @@ export class ProductService {
       ];
     }
 
+    if (params?.ids && params.ids.length > 0) {
+      where.id = { in: params.ids };
+    }
+
     const orderBy: Prisma.ProductOrderByWithRelationInput =
       params?.sort === "price_asc"
         ? { price: "asc" }
@@ -51,6 +56,9 @@ export class ProductService {
         include: {
           category: true,
           collection: true,
+          variants: {
+            select: { id: true, price: true } // Minimal fetch to show "From $X" if needed
+          }
         },
         orderBy,
         skip,
@@ -68,12 +76,42 @@ export class ProductService {
     };
   }
 
+  async listRelated(productId: string, limit = 4) {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { categoryId: true },
+    });
+
+    if (!product) return [];
+
+    return await prisma.product.findMany({
+      where: {
+        categoryId: product.categoryId,
+        id: { not: productId },
+        status: "ACTIVE",
+      },
+      take: limit,
+      include: {
+        category: true,
+        collection: true,
+        variants: {
+          select: { id: true, price: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async getProductById(id: string) {
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
         category: true,
         collection: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+        },
       },
     });
 
@@ -90,6 +128,10 @@ export class ProductService {
       include: {
         category: true,
         collection: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { sortOrder: "asc" },
+        },
       },
     });
 
@@ -151,8 +193,35 @@ export class ProductService {
     });
   }
 
-  async reduceStock(productId: string, quantity: number, tx?: Prisma.TransactionClient) {
+  async reduceStock(productId: string, quantity: number, variantId?: string, tx?: Prisma.TransactionClient) {
     const client = tx || prisma;
+
+    if (variantId) {
+      const variant = await client.productVariant.findUnique({
+        where: { id: variantId },
+        select: { stock: true, size: true, color: true },
+      });
+
+      if (!variant) {
+        throw new Error(`Variant ${variantId} not found`);
+      }
+
+      if (variant.stock < quantity) {
+        throw new Error(
+          `Insufficient stock for variant ${variant.size || ""} ${variant.color || ""}. Requested: ${quantity}, Available: ${variant.stock}`,
+        );
+      }
+
+      return await client.productVariant.update({
+        where: { id: variantId },
+        data: {
+          stock: {
+            decrement: quantity,
+          },
+        },
+      });
+    }
+
     const product = await client.product.findUnique({
       where: { id: productId },
       select: { stock: true, name: true },
