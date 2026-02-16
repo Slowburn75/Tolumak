@@ -21,8 +21,13 @@ export class OrderService {
       },
     });
 
-    if (products.length === 0 && data.items.length > 0) {
-      throw new Error("Products not found");
+    const foundProductIds = new Set(products.map((product) => product.id));
+    const missingProductIds = data.items
+      .map((item) => item.productId)
+      .filter((productId) => !foundProductIds.has(productId));
+
+    if (missingProductIds.length > 0) {
+      throw new Error("One or more products not found");
     }
 
     // 2. Calculate total and validation
@@ -31,7 +36,9 @@ export class OrderService {
 
     for (const item of data.items) {
       const product = products.find((p) => p.id === item.productId);
-      if (!product) continue;
+      if (!product) {
+        throw new Error("One or more products not found");
+      }
 
       let price = product.price;
       let stock = product.stock;
