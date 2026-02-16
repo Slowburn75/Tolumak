@@ -10,6 +10,8 @@ export const orderRouter = {
           z.object({
             productId: z.string(),
             variantId: z.string().optional(),
+            size: z.string().optional(),
+            color: z.string().optional(),
             quantity: z.number().int().min(1),
           }),
         ),

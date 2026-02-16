@@ -5,7 +5,13 @@ import { OrderStatus } from "@Tolumak/db/prisma/generated";
 export class OrderService {
   async createOrder(data: {
     userId: string;
-    items: { productId: string; variantId?: string; quantity: number }[];
+    items: {
+      productId: string;
+      variantId?: string;
+      size?: string;
+      color?: string;
+      quantity: number;
+    }[];
     shippingAddress?: string;
     paymentMethod: "COD" | "BANK_TRANSFER";
     couponCode?: string;
@@ -33,8 +39,12 @@ export class OrderService {
     // 2. Calculate total and validation
     let subtotal = 0;
     const orderItems: Prisma.OrderItemCreateManyOrderInput[] = [];
+    const itemsWithResolvedVariant = data.items.map((item) => ({
+      ...item,
+      resolvedVariantId: undefined as string | undefined,
+    }));
 
-    for (const item of data.items) {
+    for (const item of itemsWithResolvedVariant) {
       const product = products.find((p) => p.id === item.productId);
       if (!product) {
         throw new Error("One or more products not found");
@@ -43,15 +53,45 @@ export class OrderService {
       let price = product.price;
       let stock = product.stock;
 
-      if (item.variantId) {
-        const variant = product.variants.find(v => v.id === item.variantId);
-        if (!variant) throw new Error(`Variant not found for product: ${product.name}`);
+      if (product.hasVariants) {
+        const hasVariantSelection = Boolean(item.variantId || item.size || item.color);
+
+        if (!hasVariantSelection) {
+          throw new Error(`Please select a size${product.variants.some((v) => Boolean(v.color)) ? " and color" : ""} for ${product.name}`);
+        }
+
+        let variant = item.variantId
+          ? product.variants.find((v) => v.id === item.variantId && v.isActive)
+          : undefined;
+
+        if (!variant) {
+          const matchingVariants = product.variants.filter(
+            (v) =>
+              v.isActive &&
+              (item.size ? v.size === item.size : true) &&
+              (item.color ? v.color === item.color : true),
+          );
+
+          if (matchingVariants.length === 0) {
+            throw new Error(`Variant not found for product: ${product.name}`);
+          }
+
+          if (matchingVariants.length > 1) {
+            throw new Error(`Please select a more specific variant (size/color) for ${product.name}`);
+          }
+
+          variant = matchingVariants[0];
+        }
+
+        item.resolvedVariantId = variant.id;
         price = variant.price;
         stock = variant.stock;
+      } else if (item.variantId) {
+        throw new Error(`Product ${product.name} does not support size/color variants`);
       }
 
       if (stock < item.quantity) {
-        throw new Error(`Insufficient stock for product: ${product.name} ${item.variantId ? '(Variant)' : ''}`);
+        throw new Error(`Insufficient stock for product: ${product.name} ${item.resolvedVariantId ? '(Variant)' : ''}`);
       }
 
       const itemTotal = price * item.quantity;
@@ -59,9 +99,9 @@ export class OrderService {
 
       orderItems.push({
         productId: item.productId,
-        variantId: item.variantId,
+        variantId: item.resolvedVariantId,
         quantity: item.quantity,
-        price: price,
+        price,
       });
     }
 
@@ -140,8 +180,8 @@ export class OrderService {
       // Given the file structure, static import should be fine as product.service doesn't import order.service.
       const { productService } = await import("../services/product.service");
 
-      for (const item of data.items) {
-        await productService.reduceStock(item.productId, item.quantity, item.variantId, tx);
+      for (const item of itemsWithResolvedVariant) {
+        await productService.reduceStock(item.productId, item.quantity, item.resolvedVariantId, tx);
       }
 
       return newOrder;
