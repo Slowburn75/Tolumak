@@ -2,7 +2,7 @@
 // Save to: packages/db/debug-signup.ts
 // Run: bun run debug-signup.ts
 
-import { PrismaClient } from './prisma/generated';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient({
     log: ['query', 'error', 'warn'],

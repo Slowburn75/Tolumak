@@ -3,8 +3,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./prisma/generated": "./prisma/generated/index.js",
-    "./prisma/generated/*": "./prisma/generated/*.js",
+    "./prisma/generated": "./src/prisma-generated.ts",
+    "./prisma/generated/*": "./src/prisma-generated.ts",
     "./*": "./src/*.ts"
   },
   "scripts": {

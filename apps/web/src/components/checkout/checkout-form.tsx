@@ -141,6 +141,8 @@ export function CheckoutForm() {
         items: items.map((item) => ({
           productId: item.productId || item.id,
           variantId: item.variantId,
+          size: item.size,
+          color: item.color,
           quantity: item.quantity,
         })),
         shippingAddress: JSON.stringify({
