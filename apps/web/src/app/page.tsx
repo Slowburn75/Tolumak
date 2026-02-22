@@ -16,9 +16,9 @@ export default async function Home() {
     <>
       <Hero />
       {/* Features Section */}
-      <section className="bg-stone-50 py-16">
-        <div className="container px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+      <section className="bg-stone-50 py-12 md:py-16 lg:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
 
             {/* Item 1 */}
             <div className="flex flex-col items-center text-center space-y-3 group">
@@ -82,8 +82,8 @@ export default async function Home() {
       {/* Collections */}
       {collectionsData.length > 0 && (
         <section className="bg-white border-t border-stone-100">
-          <div className="container px-4 py-16 md:py-24">
-            <div className="mb-12 md:mb-20 text-center space-y-4">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
+            <div className="mb-8 md:mb-12 text-center space-y-4">
               <h2 className="text-3xl md:text-4xl font-light tracking-tight text-stone-900 italic font-serif">Curated Collections</h2>
               <div className="w-16 h-[1px] bg-stone-300 mx-auto" />
               <p className="text-stone-500 max-w-lg mx-auto text-sm px-4">
@@ -135,9 +135,9 @@ export default async function Home() {
         </section>
       )}
       {/* Featured Products / New Arrivals */}
-      <section className="container px-4 py-16 md:py-24 lg:py-32 bg-white">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 bg-white">
         {/* Section Header */}
-        <div className="mb-12 md:mb-20 text-center space-y-4">
+        <div className="mb-8 md:mb-12 text-center space-y-4">
           <h2 className="text-3xl md:text-5xl font-light tracking-tight text-stone-900 italic font-serif">
             New Arrivals
           </h2>
@@ -148,7 +148,7 @@ export default async function Home() {
         </div>
 
         {/* Product Grid */}
-        <ProductGrid className="gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-12">
+        <ProductGrid className="gap-4 md:gap-6 lg:gap-8">
           {productsData.products.map((product) => (
             <ProductCard
               key={product.id}
@@ -161,7 +161,7 @@ export default async function Home() {
         </ProductGrid>
 
         {/* View All */}
-        <div className="mt-12 md:mt-20 text-center">
+        <div className="mt-8 md:mt-12 text-center">
           <Link href="/products">
             <Button
               variant="outline"
@@ -175,7 +175,7 @@ export default async function Home() {
 
       {/* Top Trending */}
       <section className="border-t border-stone-100 bg-stone-50/50">
-        <div className="container grid grid-cols-1 gap-12 md:gap-16 py-16 md:py-24 lg:grid-cols-2 items-center px-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-12 md:gap-16 py-12 md:py-16 lg:py-20 lg:grid-cols-2 items-center">
 
           {/* LEFT PROMO */}
           <div className="relative overflow-hidden group">

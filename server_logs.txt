@@ -47,7 +47,8 @@ server:dev:     code: "EADDRINUSE"
 server:dev: 
 server:dev:       at /Users/slowburn/Desktop/Projects/Tolumak/apps/server/src/index.ts:124:7
 server:dev:       at loadAndEvaluateModule (2:1)
-"collection"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+ ERROR  run failed: command  exited (1)
+$7,$8,$9,$10,$11) OFFSET $12
 server:dev: prisma:query SELECT "public"."product_variant"."id", "public"."product_variant"."price", "public"."product_variant"."productId" FROM "public"."product_variant" WHERE "public"."product_variant"."productId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
 server:dev: --> POST /rpc/product/listProducts [32m200[0m 397ms
 server:dev: Prisma models available: [
@@ -76,3 +77,4 @@ server:dev: --> POST /rpc/product/listProducts [32m200[0m 275ms
 server:dev: <-- POST /rpc/product.listProducts
 server:dev: [Server] RPC Request: /rpc/product.listProducts
 server:dev: --> POST /rpc/product.listProducts [33m404[0m 3ms
+ ERROR  run failed: command  exited (1)

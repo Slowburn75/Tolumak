@@ -20,8 +20,8 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-stone-950/40" />
 
       {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center px-6 text-center">
-        <div className="max-w-4xl space-y-10 animate-fade-up">
+      <div className="relative z-10 flex h-full items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center border-red-500">
+        <div className="w-full space-y-10 animate-fade-up">
           <div className="space-y-4">
             <p className="text-[10px] md:text-xs tracking-[0.5em] text-white/70 uppercase font-bold">
               The Autumn / Winter Edition

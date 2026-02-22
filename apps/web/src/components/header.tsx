@@ -48,7 +48,7 @@ export default function Header() {
             : "bg-transparent"
         )}
       >
-        <div className="container flex h-20 items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Trigger */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -88,7 +88,7 @@ export default function Header() {
           </div>
 
           {/* Center Nav (Desktop) */}
-          <nav className="hidden md:flex items-center space-x-12 text-[10px] uppercase tracking-[0.3em] font-bold">
+          <nav className="hidden md:flex items-center space-x-6 text-[10px] uppercase tracking-[0.3em] font-bold">
             {links.map(({ to, label }) => (
               <Link
                 key={to}
