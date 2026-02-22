@@ -23,6 +23,7 @@ export const queryClient = new QueryClient({
 export const link = new RPCLink({
   url: `${env.NEXT_PUBLIC_SERVER_URL}/rpc`,
   fetch(url, options) {
+    console.log(`[ORPC Fetch] ${url}`);
     return fetch(url, {
       ...options,
       credentials: "include",

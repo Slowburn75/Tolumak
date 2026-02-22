@@ -1,0 +1,78 @@
+
+> dev:server
+> turbo -F server dev
+
+• turbo 2.7.5
+• Packages in scope: server
+• Running dev in 1 packages
+• Remote caching disabled
+server:dev: cache bypass, force executing 1f5bfc9686619cdb
+server:dev: $ bun run --hot src/index.ts
+server:dev: Prisma models available: [
+server:dev:   "_originalClient", "_runtimeDataModel", "_requestHandler", "_connectionPromise", "_disconnectionPromise",
+server:dev:   "_engineConfig", "_accelerateEngineConfig", "_clientVersion", "_errorFormat", "_tracingHelper",
+server:dev:   "_previewFeatures", "_activeProvider", "_globalOmit", "_extensions", "_engine", "_appliedParent",
+server:dev:   "_createPrismaPromise", "constructor", "_transactionWithArray", "_transactionWithCallback",
+server:dev:   "_createItxClient", "_request", "_executeRequest", "_hasPreviewFlag", "user", "session", "account",
+server:dev:   "verification", "product", "productVariant", "collection", "attribute", "category", "wishlist",
+server:dev:   "review", "address", "order", "orderItem", "payment", "bankAccount", "orderStatusHistory", "coupon",
+server:dev:   "couponUsage", "setting", "activityLog", "systemMetric"
+server:dev: ]
+server:dev: Server running on http://localhost:3000
+server:dev: Started development server: http://localhost:3000
+server:dev: <-- POST /rpc/product/listProducts
+server:dev: [Server] RPC Request: /rpc/product/listProducts
+server:dev: prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."product"."id" FROM "public"."product" WHERE "public"."product"."status" = CAST($1::text AS "public"."ProductStatus") OFFSET $2) AS "sub"
+server:dev: prisma:query SELECT "public"."product"."id", "public"."product"."name", "public"."server:dev: Prisma models available: [
+server:dev:   "_originalClient", "_runtimeDataModel", "_requestHandler", "_connectionPromise", "_disconnectionPromise",
+server:dev:   "_engineConfig", "_accelerateEngineConfig", "_clientVersion", "_errorFormat", "_tracingHelper",
+server:dev:   "_previewFeatures", "_activeProvider", "_globalOmit", "_extensions", "_engine", "_appliedParent",
+server:dev:   "_createPrismaPromise", "constructor", "_transactionWithArray", "_transactionWithCallback",
+server:dev:   "_createItxClient", "_request", "_executeRequest", "_hasPreviewFlag", "user", "session", "account",
+server:dev:   "verification", "product", "productVariant", "collection", "attribute", "category", "wishlist",
+server:dev:   "review", "address", "order", "orderItem", "payment", "bankAccount", "orderStatusHistory", "coupon",
+server:dev:   "couponUsage", "setting", "activityLog", "systemMetric"
+server:dev: ]
+server:dev: 119 | app.get("/", (c) => {
+server:dev: 120 |   return c.text("OK");
+server:dev: 121 | });
+server:dev: 122 | 
+server:dev: 123 | if (import.meta.main) {
+server:dev: 124 |   Bun.serve({
+server:dev:             ^
+server:dev: error: Failed to start server. Is port 3000 in use?
+server:dev:  syscall: "listen",
+server:dev:    errno: 0,
+server:dev:     code: "EADDRINUSE"
+server:dev: 
+server:dev:       at /Users/slowburn/Desktop/Projects/Tolumak/apps/server/src/index.ts:124:7
+server:dev:       at loadAndEvaluateModule (2:1)
+"collection"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+server:dev: prisma:query SELECT "public"."product_variant"."id", "public"."product_variant"."price", "public"."product_variant"."productId" FROM "public"."product_variant" WHERE "public"."product_variant"."productId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+server:dev: --> POST /rpc/product/listProducts [32m200[0m 397ms
+server:dev: Prisma models available: [
+server:dev:   "_originalClient", "_runtimeDataModel", "_requestHandler", "_connectionPromise", "_disconnectionPromise",
+server:dev:   "_engineConfig", "_accelerateEngineConfig", "_clientVersion", "_errorFormat", "_tracingHelper",
+server:dev:   "_previewFeatures", "_activeProvider", "_globalOmit", "_extensions", "_engine", "_appliedParent",
+server:dev:   "_createPrismaPromise", "constructor", "_transactionWithArray", "_transactionWithCallback",
+server:dev:   "_createItxClient", "_request", "_executeRequest", "_hasPreviewFlag", "user", "session", "account",
+server:dev:   "verification", "product", "productVariant", "collection", "attribute", "category", "wishlist",
+server:dev:   "review", "address", "order", "orderItem", "payment", "bankAccount", "orderStatusHistory", "coupon",
+server:dev:   "couponUsage", "setting", "activityLog", "systemMetric"
+server:dev: ]
+server:dev: Server running on http://localhost:3000
+server:dev: Started development server: http://localhost:3000
+server:dev: <-- POST /rpc/product.listProducts
+server:dev: [Server] RPC Request: /rpc/product.listProducts
+server:dev: --> POST /rpc/product.listProducts [33m404[0m 9ms
+server:dev: <-- POST /rpc/product/listProducts
+server:dev: [Server] RPC Request: /rpc/product/listProducts
+server:dev: prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."product"."id" FROM "public"."product" WHERE "public"."product"."status" = CAST($1::text AS "public"."ProductStatus") OFFSET $2) AS "sub"
+server:dev: prisma:query SELECT "public"."product"."id", "public"."product"."name", "public"."product"."slug", "public"."product"."sku", "public"."product"."description", "public"."product"."images", "public"."product"."price", "public"."product"."compareAtPrice", "public"."product"."stock", "public"."product"."weight", "public"."product"."attributes", "public"."product"."status"::text, "public"."product"."hasVariants", "public"."product"."collectionId", "public"."product"."categoryId", "public"."product"."createdAt", "public"."product"."updatedAt" FROM "public"."product" WHERE "public"."product"."status" = CAST($1::text AS "public"."ProductStatus") ORDER BY "public"."product"."createdAt" DESC LIMIT $2 OFFSET $3
+server:dev: prisma:query SELECT "public"."category"."id", "public"."category"."name", "public"."category"."slug", "public"."category"."description", "public"."category"."image", "public"."category"."parentId", "public"."category"."isActive", "public"."category"."sortOrder", "public"."category"."createdAt", "public"."category"."updatedAt" FROM "public"."category" WHERE "public"."category"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+server:dev: prisma:query SELECT "public"."collection"."id", "public"."collection"."name", "public"."collection"."slug", "public"."collection"."description", "public"."collection"."image", "public"."collection"."isActive", "public"."collection"."sortOrder", "public"."collection"."createdAt", "public"."collection"."updatedAt" FROM "public"."collection" WHERE "public"."collection"."id" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+server:dev: prisma:query SELECT "public"."product_variant"."id", "public"."product_variant"."price", "public"."product_variant"."productId" FROM "public"."product_variant" WHERE "public"."product_variant"."productId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) OFFSET $12
+server:dev: --> POST /rpc/product/listProducts [32m200[0m 275ms
+server:dev: <-- POST /rpc/product.listProducts
+server:dev: [Server] RPC Request: /rpc/product.listProducts
+server:dev: --> POST /rpc/product.listProducts [33m404[0m 3ms

@@ -34,14 +34,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
           <div className="flex flex-col gap-6">
             <div className="gap-2">
-              <div className="text-sm text-muted-foreground mb-2">
+              <div className="text-sm text-muted-foreground mb-1 md:mb-2">
                 {product.category?.name || "Uncategorized"}
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{product.name}</h1>
 
             </div>
 
-            <div className="prose prose-sm max-w-none text-muted-foreground">
+            <div className="prose prose-sm max-w-none text-muted-foreground line-clamp-4 md:line-clamp-none">
               <p>{product.description}</p>
             </div>
 
@@ -55,8 +55,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Reviews Section */}
-        <div className="max-w-4xl mx-auto border-t border-stone-100 pt-16">
-          <h2 className="text-2xl font-light italic font-serif text-stone-900 mb-12 text-center">
+        <div className="max-w-4xl mx-auto border-t border-stone-100 pt-10 md:pt-16">
+          <h2 className="text-xl md:text-2xl font-light italic font-serif text-stone-900 mb-8 md:mb-12 text-center">
             Customer Reviews
           </h2>
 

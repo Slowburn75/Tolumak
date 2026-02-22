@@ -26,16 +26,16 @@ export function Hero() {
             <p className="text-[10px] md:text-xs tracking-[0.5em] text-white/70 uppercase font-bold">
               The Autumn / Winter Edition
             </p>
-            <h1 className="text-6xl md:text-8xl font-light tracking-tight text-white italic font-serif leading-tight">
+            <h1 className="text-4xl md:text-8xl font-light tracking-tight text-white italic font-serif leading-tight">
               Timeless <br className="hidden md:block" /> Elegance
             </h1>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6 pt-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 pt-6 px-4 sm:px-0">
             <Link href="/products?category=women">
               <Button
                 size="lg"
-                className="rounded-none bg-white text-stone-900 hover:bg-stone-100 px-12 py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 shadow-xl"
+                className="w-full sm:w-auto rounded-none bg-white text-stone-900 hover:bg-stone-100 px-8 sm:px-12 py-6 sm:py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 shadow-xl"
               >
                 Shop Women
               </Button>
@@ -45,7 +45,7 @@ export function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="rounded-none border-white/30 bg-transparent text-white hover:bg-white hover:text-stone-900 px-12 py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 backdrop-blur-sm"
+                className="w-full sm:w-auto rounded-none border-white/30 bg-transparent text-white hover:bg-white hover:text-stone-900 px-8 sm:px-12 py-6 sm:py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 backdrop-blur-sm"
               >
                 Shop Men
               </Button>

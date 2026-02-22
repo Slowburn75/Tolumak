@@ -82,24 +82,24 @@ export default async function Home() {
       {/* Collections */}
       {collectionsData.length > 0 && (
         <section className="bg-white border-t border-stone-100">
-          <div className="container px-4 py-24">
-            <div className="mb-20 text-center space-y-4">
+          <div className="container px-4 py-16 md:py-24">
+            <div className="mb-12 md:mb-20 text-center space-y-4">
               <h2 className="text-3xl md:text-4xl font-light tracking-tight text-stone-900 italic font-serif">Curated Collections</h2>
               <div className="w-16 h-[1px] bg-stone-300 mx-auto" />
-              <p className="text-stone-500 max-w-lg mx-auto text-sm">
+              <p className="text-stone-500 max-w-lg mx-auto text-sm px-4">
                 Explore our meticulously crafted selections, where contemporary design meets timeless elegance.
               </p>
             </div>
 
             <div className="relative">
-              <div className="flex gap-12 overflow-x-auto scrollbar-hide scroll-smooth pb-10 px-2">
+              <div className="flex gap-8 md:gap-12 overflow-x-auto scrollbar-hide scroll-smooth pb-10 px-2 -mx-4 md:mx-0 snap-x snap-mandatory">
                 {collectionsData.map((collection) => (
                   <Link
                     key={collection.id}
                     href={`/products?collectionId=${collection.id}`}
-                    className="group min-w-[240px] flex flex-col items-center space-y-6"
+                    className="group min-w-[200px] md:min-w-[240px] flex flex-col items-center space-y-6 snap-center first:ml-4 last:mr-4 md:first:ml-0 md:last:mr-0"
                   >
-                    <div className="relative w-56 h-56">
+                    <div className="relative w-48 h-48 md:w-56 md:h-56">
                       <div className="absolute inset-0 rounded-full border-2 border-dashed border-stone-100 transition-transform duration-700 group-hover:rotate-180" />
                       <div className="absolute inset-2 rounded-full bg-stone-50 flex items-center justify-center overflow-hidden border border-stone-100 shadow-inner">
                         {collection.image ? (
@@ -114,13 +114,13 @@ export default async function Home() {
                           </span>
                         )}
                       </div>
-                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-sm border border-stone-100 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-sm border border-stone-100 opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                         <p className="text-[10px] whitespace-nowrap uppercase tracking-widest font-bold text-stone-800">Explore</p>
                       </div>
                     </div>
 
                     <div className="text-center space-y-1">
-                      <h3 className="text-lg font-medium text-stone-900 group-hover:text-stone-600 transition-colors">
+                      <h3 className="text-base md:text-lg font-medium text-stone-900 group-hover:text-stone-600 transition-colors">
                         {collection.name}
                       </h3>
                       <p className="text-[10px] text-stone-400 uppercase tracking-[0.2em]">
@@ -135,35 +135,20 @@ export default async function Home() {
         </section>
       )}
       {/* Featured Products / New Arrivals */}
-      <section className="container px-4 py-24 md:py-32 bg-white">
+      <section className="container px-4 py-16 md:py-24 lg:py-32 bg-white">
         {/* Section Header */}
-        <div className="mb-20 text-center space-y-4">
+        <div className="mb-12 md:mb-20 text-center space-y-4">
           <h2 className="text-3xl md:text-5xl font-light tracking-tight text-stone-900 italic font-serif">
             New Arrivals
           </h2>
           <div className="w-16 h-[1px] bg-stone-300 mx-auto" />
-          <p className="mx-auto max-w-md text-sm text-stone-500 font-light">
+          <p className="mx-auto max-w-md text-sm text-stone-500 font-light px-4">
             A carefully curated selection of pieces, designed to redefine your seasonal wardrobe.
           </p>
         </div>
 
-        {/* Category Tabs */}
-        {/* <div className="mb-14 flex justify-center gap-10 text-[10px] uppercase tracking-[0.3em] font-bold">
-          {["Women", "Men", "Kids"].map((label, i) => (
-            <button
-              key={label}
-              className={`relative pb-2 transition-colors duration-300 ${i === 0
-                ? "text-stone-900 border-b border-stone-900"
-                : "text-stone-400 hover:text-stone-700"
-                }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div> */}
-
         {/* Product Grid */}
-        <ProductGrid className="gap-x-8 gap-y-8">
+        <ProductGrid className="gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-12">
           {productsData.products.map((product) => (
             <ProductCard
               key={product.id}
@@ -176,11 +161,11 @@ export default async function Home() {
         </ProductGrid>
 
         {/* View All */}
-        <div className="mt-20 text-center">
+        <div className="mt-12 md:mt-20 text-center">
           <Link href="/products">
             <Button
               variant="outline"
-              className="rounded-none px-12 py-6 border-stone-200 text-stone-900 uppercase tracking-widest text-xs hover:bg-stone-950 hover:text-white transition-all duration-300"
+              className="w-full sm:w-auto rounded-none px-12 py-6 border-stone-200 text-stone-900 uppercase tracking-widest text-xs hover:bg-stone-950 hover:text-white transition-all duration-300"
             >
               Discover More
             </Button>
@@ -190,7 +175,7 @@ export default async function Home() {
 
       {/* Top Trending */}
       <section className="border-t border-stone-100 bg-stone-50/50">
-        <div className="container grid grid-cols-1 gap-16 py-24 lg:grid-cols-2 items-center">
+        <div className="container grid grid-cols-1 gap-12 md:gap-16 py-16 md:py-24 lg:grid-cols-2 items-center px-4">
 
           {/* LEFT PROMO */}
           <div className="relative overflow-hidden group">
@@ -204,17 +189,17 @@ export default async function Home() {
 
             <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/10 transition-colors duration-500" />
 
-            <div className="absolute inset-0 flex flex-col justify-end p-12 text-white space-y-4">
+            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 text-white space-y-4">
               <span className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-80">
                 Seasonal Trend
               </span>
 
-              <h2 className="text-4xl md:text-5xl font-light leading-tight italic font-serif">
+              <h2 className="text-3xl md:text-5xl font-light leading-tight italic font-serif">
                 Winter Atelier <br /> For Women
               </h2>
 
               <Link href="/products?collection=winter" className="pt-4">
-                <Button className="rounded-none bg-white text-stone-900 hover:bg-stone-900 hover:text-white px-8 py-6 uppercase tracking-widest text-xs transition-all duration-300">
+                <Button className="w-full sm:w-auto rounded-none bg-white text-stone-900 hover:bg-stone-900 hover:text-white px-8 py-6 uppercase tracking-widest text-xs transition-all duration-300">
                   Explore Selection
                 </Button>
               </Link>

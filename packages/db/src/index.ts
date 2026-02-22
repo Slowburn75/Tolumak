@@ -19,8 +19,11 @@ declare global {
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 }
 
-const prisma = globalThis.prisma ?? prismaClientSingleton();
+// Forcing fresh instance for now to avoid stale globalThis issues in development
+const prisma = prismaClientSingleton();
+
+console.log("Prisma models available:", Object.keys(prisma).filter(k => !k.startsWith('$')));
 
 export default prisma;
 
-if (env.NODE_ENV !== "production") globalThis.prisma = prisma;
+// if (env.NODE_ENV !== "production") globalThis.prisma = prisma;

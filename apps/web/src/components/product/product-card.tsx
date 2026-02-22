@@ -36,8 +36,8 @@ export function ProductCard({ product }: { product: ProductProps }) {
   };
 
   return (
-    <Link href={`/products/${product.slug}`}>
-      <div className="group relative overflow-hidden h-[360px] w-[240px] bg-background transition-all hover:shadow-xl">
+    <Link href={`/products/${product.slug}`} className="block w-full">
+      <div className="group relative overflow-hidden aspect-[3/4] w-full bg-background transition-all hover:shadow-xl border border-stone-100">
 
         {/* IMAGE */}
         <div className="relative h-full w-full bg-muted">
@@ -75,16 +75,16 @@ export function ProductCard({ product }: { product: ProductProps }) {
         </div>
 
         {/* INFO */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 p-4 opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          <div className="text-xs uppercase tracking-widest text-white/80">
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-4 md:opacity-0 md:translate-y-4 md:transition-all md:duration-300 md:group-hover:opacity-100 md:group-hover:translate-y-0 bg-gradient-to-t from-stone-900/80 via-stone-900/40 to-transparent">
+          <div className="text-[10px] uppercase tracking-widest text-white/90">
             {product.category?.name || "Uncategorized"}
           </div>
 
-          <h3 className="mt-1 text-sm font-semibold text-white line-clamp-2">
+          <h3 className="mt-1 text-sm font-medium text-white line-clamp-1">
             {product.name}
           </h3>
 
-          <div className="mt-1 text-white font-bold">
+          <div className="mt-1 text-white font-bold text-sm">
             {formatPrice(product.price)}
           </div>
         </div>

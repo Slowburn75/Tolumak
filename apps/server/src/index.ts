@@ -41,7 +41,7 @@ export const apiHandler = new OpenAPIHandler(appRouter, {
   ],
   interceptors: [
     onError((error) => {
-      console.error(error);
+      console.error("[RPC Error]", error);
     }),
   ],
 });
@@ -54,9 +54,9 @@ export const rpcHandler = new RPCHandler(appRouter, {
   ],
 });
 
-app.use("/*", async (c, next) => {
+app.all("/rpc/*", async (c) => {
   const context = await createContext({ context: c });
-
+  console.log(`[Server] RPC Request: ${c.req.path}`);
   const rpcResult = await rpcHandler.handle(c.req.raw, {
     prefix: "/rpc",
     context: context,
@@ -65,7 +65,11 @@ app.use("/*", async (c, next) => {
   if (rpcResult.matched) {
     return c.newResponse(rpcResult.response.body, rpcResult.response);
   }
+  return c.text("Not Found", 404);
+});
 
+app.all("/api-reference/*", async (c) => {
+  const context = await createContext({ context: c });
   const apiResult = await apiHandler.handle(c.req.raw, {
     prefix: "/api-reference",
     context: context,
@@ -74,8 +78,7 @@ app.use("/*", async (c, next) => {
   if (apiResult.matched) {
     return c.newResponse(apiResult.response.body, apiResult.response);
   }
-
-  await next();
+  return c.text("Not Found", 404);
 });
 
 app.post("/upload/payment-proof", async (c) => {

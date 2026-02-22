@@ -2,6 +2,9 @@ import { ProductGrid } from "@/components/product/product-grid";
 import { ProductCard } from "@/components/product/product-card";
 import { ProductFilters } from "@/components/product/product-filters";
 import { client } from "@/utils/orpc";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default async function ProductsPage({
   searchParams,
@@ -9,6 +12,7 @@ export default async function ProductsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
+  // ... (keeping existing logic for params and data fetching)
   const categoryId = typeof params.categoryId === "string" ? params.categoryId : undefined;
   const collectionId = typeof params.collectionId === "string" ? params.collectionId : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
@@ -37,8 +41,30 @@ export default async function ProductsPage({
 
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold tracking-tight">Products</h1>
-            <span className="text-muted-foreground text-sm">{data.total} results</span>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight">Products</h1>
+
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground text-xs md:text-sm">{data.total} results</span>
+
+              <div className="md:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Filter className="h-4 w-4" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] bg-white">
+                    <SheetHeader>
+                      <SheetTitle>Filters</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6">
+                      <ProductFilters />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </div>
           </div>
 
           {data.products.length === 0 ? (
