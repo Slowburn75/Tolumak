@@ -2,7 +2,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "@Tolumak/env/server";
 import pg from "pg";
 
-import { PrismaClient } from "../prisma/generated";
+import { PrismaClient } from "@prisma/client";
 
 const connectionString = env.DATABASE_URL;
 const pool = new pg.Pool({ connectionString });
