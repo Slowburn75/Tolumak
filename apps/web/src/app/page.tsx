@@ -5,6 +5,7 @@ import { client } from "@/utils/orpc";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { EditorialSection } from "@/components/editorial-section";
 
 export default async function Home() {
   const [productsData, collectionsData] = await Promise.all([
@@ -15,8 +16,8 @@ export default async function Home() {
   return (
     <>
       <Hero />
-      {/* Features Section */}
-      <section className="bg-stone-50 py-12 md:py-16 lg:py-20">
+      {/* Features Section - Soft Neutral */}
+      <section className="bg-neutral-50 py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
 
@@ -28,9 +29,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10l9 4 9-4V7" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Free Shipping</h3>
-                <p className="text-stone-500 text-xs">On all orders over $99</p>
+              <div className="space-y-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-900">Free Shipping</h3>
+                <p className="text-stone-400 text-[10px] font-light italic">On all orders over $99</p>
               </div>
             </div>
 
@@ -42,9 +43,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m-3-4h6" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">30-Day Returns</h3>
-                <p className="text-stone-500 text-xs">Hassle-free exchanges</p>
+              <div className="space-y-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-900">30-Day Returns</h3>
+                <p className="text-stone-400 text-[10px] font-light italic">Hassle-free exchanges</p>
               </div>
             </div>
 
@@ -55,9 +56,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-6m0 0a4 4 0 00-4 4m4-4a4 4 0 014 4m-8 0v2m8-2v2" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Expert Support</h3>
-                <p className="text-stone-500 text-xs">Available 24/7 for you</p>
+              <div className="space-y-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-900">Expert Support</h3>
+                <p className="text-stone-400 text-[10px] font-light italic">Available 24/7 for you</p>
               </div>
             </div>
 
@@ -69,9 +70,9 @@ export default async function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18" />
                 </svg>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-stone-900">Secure Payment</h3>
-                <p className="text-stone-500 text-xs">100% encryption guaranteed</p>
+              <div className="space-y-2">
+                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-stone-900">Secure Payment</h3>
+                <p className="text-stone-400 text-[10px] font-light italic">100% encryption guaranteed</p>
               </div>
             </div>
 
@@ -83,10 +84,13 @@ export default async function Home() {
       {collectionsData.length > 0 && (
         <section className="bg-white border-t border-stone-100">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
-            <div className="mb-8 md:mb-12 text-center space-y-4">
-              <h2 className="text-3xl md:text-4xl font-light tracking-tight text-stone-900 italic font-serif">Curated Collections</h2>
-              <div className="w-16 h-[1px] bg-stone-300 mx-auto" />
-              <p className="text-stone-500 max-w-lg mx-auto text-sm px-4">
+            <div className="mb-16 md:mb-24 text-center space-y-6">
+              <div className="space-y-2">
+                <span className="text-[9px] uppercase tracking-[0.5em] text-stone-400 font-bold">The Selection</span>
+                <h2 className="text-4xl md:text-6xl font-light tracking-tight text-stone-900 italic font-serif">Curated Collections</h2>
+              </div>
+              <div className="w-12 h-[1px] bg-stone-200 mx-auto" />
+              <p className="text-stone-400 max-w-lg mx-auto text-xs px-4 font-light leading-relaxed">
                 Explore our meticulously crafted selections, where contemporary design meets timeless elegance.
               </p>
             </div>
@@ -134,48 +138,64 @@ export default async function Home() {
           </div>
         </section>
       )}
-      {/* Featured Products / New Arrivals */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 bg-white">
-        {/* Section Header */}
-        <div className="mb-8 md:mb-12 text-center space-y-4">
-          <h2 className="text-3xl md:text-5xl font-light tracking-tight text-stone-900 italic font-serif">
-            New Arrivals
-          </h2>
-          <div className="w-16 h-[1px] bg-stone-300 mx-auto" />
-          <p className="mx-auto max-w-md text-sm text-stone-500 font-light px-4">
-            A carefully curated selection of pieces, designed to redefine your seasonal wardrobe.
-          </p>
-        </div>
 
-        {/* Product Grid */}
-        <ProductGrid className="gap-4 md:gap-6 lg:gap-8">
-          {productsData.products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={{
-                ...product,
-                category: product.category || undefined,
-              }}
-            />
-          ))}
-        </ProductGrid>
+      {/* Editorial Section - Full Impact */}
+      <EditorialSection
+        title="Modern Minimalist"
+        subtitle="Avant-Garde Series"
+        description="A bold exploration of silhouette and texture, designed for those who seek to redefine the boundaries of contemporary fashion."
+        image="/Users/slowburn/.gemini/antigravity/brain/bb7cd921-0118-4f85-950b-1a0f04915880/editorial_fashion_model_1771787870253.png"
+        ctaText="View Series"
+        ctaLink="/products?collection=editorial"
+      />
 
-        {/* View All */}
-        <div className="mt-8 md:mt-12 text-center">
-          <Link href="/products">
-            <Button
-              variant="outline"
-              className="w-full sm:w-auto rounded-none px-12 py-6 border-stone-200 text-stone-900 uppercase tracking-widest text-xs hover:bg-stone-950 hover:text-white transition-all duration-300"
-            >
-              Discover More
-            </Button>
-          </Link>
+      {/* Featured Products / New Arrivals - Neutral 100 */}
+      <section className="bg-neutral-100 py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="mb-16 md:mb-24 text-center space-y-6">
+            <div className="space-y-2">
+              <span className="text-[9px] uppercase tracking-[0.5em] text-stone-400 font-bold">New arrivals</span>
+              <h2 className="text-4xl md:text-6xl font-light tracking-tight text-stone-900 italic font-serif">
+                The Season Edit
+              </h2>
+            </div>
+            <div className="w-12 h-[1px] bg-stone-200 mx-auto" />
+            <p className="mx-auto max-w-md text-xs text-stone-400 font-light px-4 leading-relaxed">
+              A carefully curated selection of pieces, designed to redefine your seasonal wardrobe.
+            </p>
+          </div>
+
+          {/* Product Grid */}
+          <ProductGrid className="gap-8 md:gap-12">
+            {productsData.products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={{
+                  ...product,
+                  category: product.category || undefined,
+                }}
+              />
+            ))}
+          </ProductGrid>
+
+          <div className="mt-16 md:mt-24 text-center">
+            <Link href="/products">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-stone-200 text-stone-900 hover:bg-stone-950 hover:text-white transition-all duration-500"
+              >
+                Discover the collection
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Top Trending */}
-      <section className="border-t border-stone-100 bg-stone-50/50">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-12 md:gap-16 py-12 md:py-16 lg:py-20 lg:grid-cols-2 items-center">
+      {/* Top Trending - Pure White */}
+      <section className="border-t border-stone-100 bg-white py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-1 gap-16 md:gap-24 lg:grid-cols-2 items-center">
 
           {/* LEFT PROMO */}
           <div className="relative overflow-hidden group">
@@ -189,17 +209,17 @@ export default async function Home() {
 
             <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/10 transition-colors duration-500" />
 
-            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-12 text-white space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-80">
+            <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-16 text-white space-y-6">
+              <span className="text-[10px] uppercase tracking-[0.5em] font-bold opacity-60">
                 Seasonal Trend
               </span>
 
-              <h2 className="text-3xl md:text-5xl font-light leading-tight italic font-serif">
+              <h2 className="text-4xl md:text-6xl font-light leading-[1.1] italic font-serif">
                 Winter Atelier <br /> For Women
               </h2>
 
-              <Link href="/products?collection=winter" className="pt-4">
-                <Button className="w-full sm:w-auto rounded-none bg-white text-stone-900 hover:bg-stone-900 hover:text-white px-8 py-6 uppercase tracking-widest text-xs transition-all duration-300">
+              <Link href="/products?collection=winter" className="pt-6">
+                <Button variant="default" className="bg-white text-stone-900 hover:bg-stone-900 hover:text-white transition-all duration-500">
                   Explore Selection
                 </Button>
               </Link>
@@ -208,10 +228,13 @@ export default async function Home() {
 
           {/* RIGHT TRENDING PRODUCTS */}
           <div className="space-y-12">
-            <div className="text-center lg:text-left space-y-4">
-              <h2 className="text-3xl font-light italic font-serif text-stone-900">Top Trending</h2>
-              <p className="text-stone-500 text-sm font-light max-w-sm">
-                The most coveted pieces from our latest collection, as chosen by our global community.
+            <div className="text-center lg:text-left space-y-6">
+              <div className="space-y-2">
+                <span className="text-[9px] uppercase tracking-[0.5em] text-stone-400 font-bold">Trending</span>
+                <h2 className="text-3xl md:text-4xl font-light italic font-serif text-stone-900">The Coveted List</h2>
+              </div>
+              <p className="text-stone-400 text-xs font-light max-w-sm leading-relaxed">
+                The most desired pieces from our latest collection, as chosen by our global community.
               </p>
             </div>
 

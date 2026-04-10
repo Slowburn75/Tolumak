@@ -20,22 +20,23 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-stone-950/40" />
 
       {/* Content */}
-      <div className="relative z-10 flex h-full items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center border-red-500">
-        <div className="w-full space-y-10 animate-fade-up">
-          <div className="space-y-4">
-            <p className="text-[10px] md:text-xs tracking-[0.5em] text-white/70 uppercase font-bold">
+      <div className="relative z-10 flex h-full items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
+        <div className="w-full space-y-12 animate-fade-up">
+          <div className="space-y-6">
+            <p className="text-[10px] md:text-xs tracking-[0.6em] text-white/60 uppercase font-bold">
               The Autumn / Winter Edition
             </p>
-            <h1 className="text-4xl md:text-8xl font-light tracking-tight text-white italic font-serif leading-tight">
+            <h1 className="text-5xl md:text-9xl font-light tracking-tighter text-white italic font-serif leading-[0.9]">
               Timeless <br className="hidden md:block" /> Elegance
             </h1>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 pt-6 px-4 sm:px-0">
+          <div className="flex flex-col sm:flex-row justify-center gap-6 pt-10">
             <Link href="/products?category=women">
               <Button
+                variant="default"
                 size="lg"
-                className="w-full sm:w-auto rounded-none bg-white text-stone-900 hover:bg-stone-100 px-8 sm:px-12 py-6 sm:py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 shadow-xl"
+                className="w-full sm:w-auto bg-white text-stone-900 hover:bg-stone-100"
               >
                 Shop Women
               </Button>
@@ -43,17 +44,17 @@ export function Hero() {
 
             <Link href="/products?category=men">
               <Button
-                size="lg"
                 variant="outline"
-                className="w-full sm:w-auto rounded-none border-white/30 bg-transparent text-white hover:bg-white hover:text-stone-900 px-8 sm:px-12 py-6 sm:py-8 uppercase tracking-[0.2em] text-[10px] font-bold transition-all duration-300 backdrop-blur-sm"
+                size="lg"
+                className="w-full sm:w-auto border-white/20 text-white hover:bg-white hover:text-stone-900 backdrop-blur-sm"
               >
                 Shop Men
               </Button>
             </Link>
           </div>
 
-          <div className="pt-12 animate-bounce opacity-50">
-            <div className="w-[1px] h-12 bg-white/30 mx-auto" />
+          <div className="pt-16 animate-bounce opacity-30">
+            <div className="w-[1px] h-16 bg-white mx-auto" />
           </div>
         </div>
       </div>

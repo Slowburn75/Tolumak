@@ -75,17 +75,23 @@ export function ProductCard({ product }: { product: ProductProps }) {
         </div>
 
         {/* INFO */}
-        <div className="p-4 bg-white border-t border-stone-50">
-          <div className="text-[10px] uppercase tracking-widest text-stone-400">
-            {product.category?.name || "Uncategorized"}
+        <div className="p-6 bg-white space-y-3">
+          <div className="space-y-1">
+            <p className="text-[9px] uppercase tracking-[0.2em] text-stone-400 font-bold">
+              {product.category?.name || "Uncategorized"}
+            </p>
+            <h3 className="text-sm font-medium text-stone-900 line-clamp-1">
+              {product.name}
+            </h3>
           </div>
 
-          <h3 className="mt-1 text-sm font-medium text-stone-900 line-clamp-1">
-            {product.name}
-          </h3>
-
-          <div className="mt-1 text-stone-900 font-bold text-sm">
-            {formatPrice(product.price)}
+          <div className="pt-2 border-t border-stone-50 flex items-baseline justify-between">
+            <span className="text-base font-light tracking-tight text-stone-900">
+              {formatPrice(product.price)}
+            </span>
+            <span className="text-[10px] text-stone-300 font-bold uppercase tracking-widest">
+              Detail
+            </span>
           </div>
         </div>
       </div>
