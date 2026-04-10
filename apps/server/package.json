@@ -3,9 +3,9 @@
   "type": "module",
   "main": "api/index.js",
   "scripts": {
-    "build": "tsdown && mv api/index.mjs api/index.js",
+    "build": "tsdown && mv api/server.mjs api/index.js",
     "check-types": "tsc -b",
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "start": "node api/index.js"
   },
   "dependencies": {
