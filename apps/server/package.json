@@ -1,12 +1,12 @@
 {
   "name": "server",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "api/index.js",
   "scripts": {
-    "build": "tsdown && mv dist/index.mjs dist/index.js",
+    "build": "tsdown && mv api/index.mjs api/index.js",
     "check-types": "tsc -b",
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node api/index.js"
   },
   "dependencies": {
     "@Tolumak/api": "workspace:*",
