@@ -6,4 +6,6 @@ export default defineConfig({
   outDir: "./dist",
   clean: true,
   noExternal: [/@Tolumak\/.*/],
+  platform: "node",
+  minify: true,
 });
