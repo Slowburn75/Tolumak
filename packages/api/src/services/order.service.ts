@@ -80,12 +80,12 @@ export class OrderService {
             throw new Error(`Please select a more specific variant (size/color) for ${product.name}`);
           }
 
-          variant = matchingVariants[0];
+          variant = matchingVariants[0]!;
         }
 
-        item.resolvedVariantId = variant.id;
-        price = variant.price;
-        stock = variant.stock;
+        item.resolvedVariantId = variant!.id;
+        price = variant!.price;
+        stock = variant!.stock;
       } else if (item.variantId) {
         throw new Error(`Product ${product.name} does not support size/color variants`);
       }

@@ -90,7 +90,11 @@ export const couponRouter = {
   }),
 
   create: adminProcedure.input(createCouponSchema).handler(async ({ input }) => {
-    return await couponService.createCoupon(input);
+    return await couponService.createCoupon({
+      ...input,
+      validFrom: input.validFrom!,
+      validUntil: input.validUntil!,
+    });
   }),
 
   update: adminProcedure
