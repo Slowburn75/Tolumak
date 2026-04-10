@@ -1,6 +1,9 @@
 {
   "name": "server",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "main": "api/index.js",
   "scripts": {
     "build": "tsdown && mv api/server.mjs api/index.js",
