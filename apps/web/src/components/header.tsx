@@ -20,7 +20,6 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  if (pathname.startsWith("/dashboard")) return null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +36,8 @@ export default function Header() {
     { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" },
   ] as const;
+
+  if (pathname.startsWith("/dashboard")) return null;
 
   return (
     <>

@@ -10,7 +10,9 @@ import { env } from "@Tolumak/env/server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { serveStatic } from "hono/bun";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { serve } from "@hono/node-server";
+import { fileURLToPath } from "node:url";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -120,8 +122,9 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
-if (import.meta.main) {
-  Bun.serve({
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+if (isMain) {
+  serve({
     port: 3000,
     fetch: app.fetch,
   });

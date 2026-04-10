@@ -5,15 +5,15 @@
   "scripts": {
     "build": "tsdown",
     "check-types": "tsc -b",
-    "compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
-    "dev": "bun run --hot src/index.ts",
-    "start": "bun run dist/index.js"
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@Tolumak/api": "workspace:*",
     "@Tolumak/auth": "workspace:*",
     "@Tolumak/db": "workspace:*",
     "@Tolumak/env": "workspace:*",
+    "@hono/node-server": "^1.19.13",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
@@ -26,6 +26,7 @@
     "@Tolumak/config": "workspace:*",
     "@types/bun": "catalog:",
     "tsdown": "^0.16.5",
+    "tsx": "^4.21.0",
     "typescript": "catalog:"
   }
 }
